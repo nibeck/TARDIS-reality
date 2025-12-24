@@ -27,46 +27,50 @@ struct ContentView: View {
 struct HomeView: View {
     // State variables to control the 3D model
     @State private var modelColor: Color = .blue
-    @State private var modelScale: Float = 1.0
+    // Initialize scale to 0.6 as per the preferred default
+    @State private var modelScale: Float = 0.6
     
     // Rotation state variables (Degrees)
-    @State private var rotationX: Double = 0
-    @State private var rotationY: Double = 0
+    // Set initial rotation to X=277, Y=42
+    @State private var rotationX: Double = 9
+    @State private var rotationY: Double = 42
     @State private var rotationZ: Double = 0
     
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Top: 3D RealityKit View
+          
             RealityView { content in
-                // 1. Create a Mesh (Geometry)
-                let mesh = MeshResource.generateBox(size: 0.2) // 20cm box
                 
-                // 2. Create a Material
-                let material = SimpleMaterial(color: .blue, isMetallic: false)
-                
-                // 3. Create the ModelEntity
-                let modelEntity = ModelEntity(mesh: mesh, materials: [material])
-                modelEntity.name = "MainModel" // Naming it allows us to find it in the update closure
-                
-                // 4. Create an Anchor to place the model in the world
-                // placing it 0.5 meters away (z: -0.5) and slightly up (y: 0.1)
-                let anchor = AnchorEntity(world: .zero)
-                modelEntity.position = [0, 0, -0.5]
-                
-                anchor.addChild(modelEntity)
-                content.add(anchor)
-                
-            } update: { content in
+                // Load the USDZ model asynchronously
+                // Ensure "Tardis.usdz" is in your project and added to the target
+                if let loadedModel = try? await ModelEntity(named: "Simple TARDIS") {
+                    // Create a parent entity to act as the "pivot" for the model controls
+                    let rootEntity = Entity()
+                    rootEntity.name = "TARDIS"
+                    rootEntity.position = [0, -0.3  , 0]
+                    
+                    // "Swap" Y and Z axes: Rotate the child model -90° (radians) on X
+                    // This corrects models exported with Z-up to be Y-up in RealityKit
+                    loadedModel.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
+                    
+                    rootEntity.addChild(loadedModel)
+                    
+                    let anchor = AnchorEntity(world: .zero)
+                    anchor.addChild(rootEntity)
+                    content.add(anchor)
+                } else {
+                    print("Failed to load model named 'Tardis'. Check filename.")
+                }
+            }
+            update: { content in
                 // This closure runs whenever the SwiftUI state (@State) changes
+                
+           
                 
                 // Find our model by name
                 if let anchor = content.entities.first,
-                   let modelEntity = anchor.children.first(where: { $0.name == "MainModel" }) as? ModelEntity {
-                    
-                    // Update Color
-                    var material = SimpleMaterial()
-                    material.color = .init(tint: UIColor(modelColor))
-                    modelEntity.model?.materials = [material]
+                   let modelEntity = anchor.children.first(where: { $0.name == "TARDIS" }) {
                     
                     // Update Scale
                     modelEntity.scale = SIMD3<Float>(repeating: modelScale)
@@ -79,16 +83,28 @@ struct HomeView: View {
                     
                     // Combine rotations (Order: X -> Y -> Z)
                     modelEntity.orientation = rotZ * rotY * rotX
+                    
+                    // Color Update Logic:
+                    // Applying a SimpleMaterial here would overwrite your USDZ textures.
+                    // If you want to tint it, you'd need to modify the materials more carefully.
+                    // For now, we skip the color update to preserve the model's appearance.
+                    /*
+                    if let entityWithModel = modelEntity as? ModelEntity {
+                        var material = SimpleMaterial()
+                        material.color = .init(tint: UIColor(modelColor))
+                        entityWithModel.model?.materials = [material]
+                    }
+                    */
                 }
             }
             // Allow the 3D view to take up all available space not used by the controls
             .frame(maxHeight: .infinity)
             // Add a background color to distinguish the 3D area (useful in non-AR modes)
-            .background(Color.black.opacity(0.8))
+            .background(Color.black)
             
             // MARK: - Bottom: Standard SwiftUI Controls
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 10) {
                     Text("TARDIS Control Panel")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -96,6 +112,7 @@ struct HomeView: View {
                     Divider()
                     
                     // Color Control
+                    // (Note: This won't affect the model unless you uncomment the logic above)
                     HStack {
                         Image(systemName: "paintpalette.fill")
                         Text("Hull Color")
@@ -110,11 +127,11 @@ struct HomeView: View {
                             Image(systemName: "arrow.up.left.and.arrow.down.right")
                             Text("Size")
                             Spacer()
+                            Slider(value: $modelScale, in: 0.5...3.0)
                             Text("\(String(format: "%.1f", modelScale))x")
                                 .monospacedDigit()
                                 .foregroundStyle(.secondary)
                         }
-                        Slider(value: $modelScale, in: 0.5...3.0)
                     }
                     
                     Divider()
@@ -130,8 +147,6 @@ struct HomeView: View {
                     rotationControl(axis: "Z", value: $rotationZ)
                 }
                 .padding()
-                // Add extra padding at the bottom so the last control isn't hidden behind the TabView
-                .padding(.bottom, 20)
             }
             .background(.regularMaterial) // Glassy look for controls
         }
@@ -146,12 +161,12 @@ struct HomeView: View {
                     .font(.caption)
                     .bold()
                 Spacer()
+                Slider(value: value, in: 0...360)
                 Text("\(Int(value.wrappedValue))°")
                     .font(.caption)
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
             }
-            Slider(value: value, in: 0...360)
         }
     }
 }
