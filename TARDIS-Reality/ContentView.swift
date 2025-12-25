@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RealityKit
+internal import Combine
 
 struct ContentView: View {
     var body: some View {
@@ -25,33 +26,67 @@ struct ContentView: View {
 }
 
 struct HomeView: View {
-    // State variables to control the 3D model
+    // These @State variables are the "Brain" of the view.
+    // Whenever one of these changes, SwiftUI looks for any code reading them and re-runs it.
     @State private var modelColor: Color = .blue
-    // Initialize scale to 0.6 as per the preferred default
-    @State private var modelScale: Float = 0.6
+    @State private var frontWindowColor: Color = .yellow
+    @State private var leftWindowColor: Color = .white
+    @State private var rightWindowColor: Color = .white
+    @State private var rearWindowColor: Color = .white
+    @State private var topLightColor: Color = .white
+    @State private var modelScale: Double = 0.6
     
-    // Rotation state variables (Degrees)
-    // Set initial rotation to X=277, Y=42
-    @State private var rotationX: Double = 9
-    @State private var rotationY: Double = 42
+    // Initial Rotation state variables (Degrees)
+    @State private var rotationX: Double = 103
+    @State private var rotationY: Double = 32
     @State private var rotationZ: Double = 0
+    
+    @State private var modelParts: [String: Entity] = [:]
+    
+    // Gesture State Variables
+    @State private var lastDragTranslation: CGSize = .zero
+    @State private var lastMagnification: CGFloat = 1.0
+    
+    // Animation Timer: roughly 60 FPS
+    let timer = Timer.publish(every: 0.02, on: .main, in: .common).autoconnect()
     
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Top: 3D RealityKit View
           
             RealityView { content in
-                
-                // Load the USDZ model asynchronously
-                // Ensure "Tardis.usdz" is in your project and added to the target
-                if let loadedModel = try? await ModelEntity(named: "Simple TARDIS") {
-                    // Create a parent entity to act as the "pivot" for the model controls
+                // MARK: MAKE CLOSURE
+                // This block runs ONLY ONCE when the view first appears.
+                // We load the model and set up the initial scene here.
+                if let loadedModel = try? await Entity(named: "Simple TARDIS") {
+                    
+                    // 1. CACHE PARTS: Traverse once and store references
+                    var parts: [String: Entity] = [:]
+                    
+                    func collectParts(from entity: Entity) {
+                        if entity.components.has(ModelComponent.self) {
+                            parts[entity.name] = entity
+                        }
+                        for child in entity.children {
+                            collectParts(from: child)
+                        }
+                    }
+                    collectParts(from: loadedModel)
+                    
+                    self.modelParts = parts
+                    
+                    printCache(parts)
+                    
+                    print("--- Model Hierarchy ---")
+                    printHierarchy(entity: loadedModel, depth: 0)
+                    print("-----------------------")
+                    
+                    loadedModel.generateCollisionShapes(recursive: true)
+                    
                     let rootEntity = Entity()
                     rootEntity.name = "TARDIS"
-                    rootEntity.position = [0, -0.3  , 0]
+                    rootEntity.position = [0, -0.3, 0]
                     
-                    // "Swap" Y and Z axes: Rotate the child model -90° (radians) on X
-                    // This corrects models exported with Z-up to be Y-up in RealityKit
                     loadedModel.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
                     
                     rootEntity.addChild(loadedModel)
@@ -60,47 +95,136 @@ struct HomeView: View {
                     anchor.addChild(rootEntity)
                     content.add(anchor)
                 } else {
-                    print("Failed to load model named 'Tardis'. Check filename.")
+                    print("Failed to load model named 'Simple TARDIS'. Check filename.")
                 }
             }
             update: { content in
-                // This closure runs whenever the SwiftUI state (@State) changes
+                // MARK: UPDATE CLOSURE (The Listener)
+                // This block runs AUTOMATICALLY whenever any @State variable read inside it changes.
                 
-           
-                
-                // Find our model by name
                 if let anchor = content.entities.first,
-                   let modelEntity = anchor.children.first(where: { $0.name == "TARDIS" }) {
+                   let rootEntity = anchor.children.first(where: { $0.name == "TARDIS" }) {
                     
                     // Update Scale
-                    modelEntity.scale = SIMD3<Float>(repeating: modelScale)
+                    // Reading 'modelScale' here subscribes this closure to changes in 'modelScale'
+                    rootEntity.scale = SIMD3<Float>(repeating: Float(modelScale))
                     
                     // Update Rotation
-                    // Create quaternions for each axis (converting degrees to radians)
                     let rotX = simd_quatf(angle: Float(rotationX * .pi / 180), axis: [1, 0, 0])
                     let rotY = simd_quatf(angle: Float(rotationY * .pi / 180), axis: [0, 1, 0])
                     let rotZ = simd_quatf(angle: Float(rotationZ * .pi / 180), axis: [0, 0, 1])
                     
-                    // Combine rotations (Order: X -> Y -> Z)
-                    modelEntity.orientation = rotZ * rotY * rotX
-                    
-                    // Color Update Logic:
-                    // Applying a SimpleMaterial here would overwrite your USDZ textures.
-                    // If you want to tint it, you'd need to modify the materials more carefully.
-                    // For now, we skip the color update to preserve the model's appearance.
-                    /*
-                    if let entityWithModel = modelEntity as? ModelEntity {
-                        var material = SimpleMaterial()
-                        material.color = .init(tint: UIColor(modelColor))
-                        entityWithModel.model?.materials = [material]
+                    rootEntity.orientation = rotZ * rotY * rotX
+
+                    // Update TARDIS Color
+                    if let windowPart = modelParts["TARDIS_Mesh"] {
+                        if var modelComp = windowPart.components[ModelComponent.self] {
+                            var material = SimpleMaterial()
+                            material.color = .init(tint: UIColor(modelColor))
+                            material.roughness = 0.2
+                            material.metallic = 0.8
+                            modelComp.materials = [material]
+                            
+                            windowPart.components.set(modelComp)
+                        }
                     }
-                    */
+                    // Update Front window Color
+                    if let windowPart = modelParts["Front_Windows_Mesh"] {
+                        if var modelComp = windowPart.components[ModelComponent.self] {
+                            var material = SimpleMaterial()
+                            material.color = .init(tint: UIColor(frontWindowColor))
+                            material.roughness = 0.2
+                            material.metallic = 0.8
+                            modelComp.materials = [material]
+                            
+                            windowPart.components.set(modelComp)
+                        }
+                    }
+                    // Update Top Light Color
+                    if let windowPart = modelParts["Top_Light_Glass_Mesh"] {
+                        if var modelComp = windowPart.components[ModelComponent.self] {
+                            var material = SimpleMaterial()
+                            material.color = .init(tint: UIColor(topLightColor))
+                            material.roughness = 0.2
+                            material.metallic = 0.8
+                            modelComp.materials = [material]
+                            
+                            windowPart.components.set(modelComp)
+                        }
+                    }
+                    // Update Left Window Color
+                    if let windowPart = modelParts["Left_Windows_Mesh"] {
+                        if var modelComp = windowPart.components[ModelComponent.self] {
+                            var material = SimpleMaterial()
+                            material.color = .init(tint: UIColor(leftWindowColor))
+                            material.roughness = 0.2
+                            material.metallic = 0.8
+                            modelComp.materials = [material]
+                            
+                            windowPart.components.set(modelComp)
+                        }
+                    }
+                    // Update Right Window Color
+                    if let windowPart = modelParts["Right_Windows_Mesh"] {
+                        if var modelComp = windowPart.components[ModelComponent.self] {
+                            var material = SimpleMaterial()
+                            material.color = .init(tint: UIColor(rightWindowColor))
+                            material.roughness = 0.2
+                            material.metallic = 0.8
+                            modelComp.materials = [material]
+                            
+                            windowPart.components.set(modelComp)
+                        }
+                    }
+                    // Update Rear Window Color
+                    if let windowPart = modelParts["Rear_Windows_Mesh"] {
+                        if var modelComp = windowPart.components[ModelComponent.self] {
+                            var material = SimpleMaterial()
+                            material.color = .init(tint: UIColor(rearWindowColor))
+                            material.roughness = 0.2
+                            material.metallic = 0.8
+                            modelComp.materials = [material]
+                            
+                            windowPart.components.set(modelComp)
+                        }
+                    }
+                    
                 }
             }
-            // Allow the 3D view to take up all available space not used by the controls
             .frame(maxHeight: .infinity)
-            // Add a background color to distinguish the 3D area (useful in non-AR modes)
             .background(Color.black)
+            .gesture(
+                SimultaneousGesture(
+                    DragGesture()
+                        .onChanged { value in
+                            let deltaX = value.translation.width - lastDragTranslation.width
+                            // let deltaY = value.translation.height - lastDragTranslation.height
+                            
+                            rotationY += Double(deltaX) * 0.5
+                            // rotationX += Double(deltaY) * 0.5 // Disabled X-axis rotation gesture
+                            
+                            lastDragTranslation = value.translation
+                        }
+                        .onEnded { _ in
+                            lastDragTranslation = .zero
+                        },
+                    MagnificationGesture()
+                        .onChanged { value in
+                            let delta = value / lastMagnification
+                            modelScale *= Double(delta)
+                            lastMagnification = value
+                        }
+                        .onEnded { _ in
+                            lastMagnification = 1.0
+                        }
+                )
+            )
+            .onReceive(timer) { _ in
+                // Increment rotationY to spin the object
+                rotationY += 0.5
+                // Keep the value within 0-360 range for cleanliness
+                if rotationY >= 360 { rotationY -= 360 }
+            }
             
             // MARK: - Bottom: Standard SwiftUI Controls
             ScrollView {
@@ -111,22 +235,15 @@ struct HomeView: View {
                     
                     Divider()
                     
-                    // Color Control
-                    // (Note: This won't affect the model unless you uncomment the logic above)
-                    HStack {
-                        Image(systemName: "paintpalette.fill")
-                        Text("Hull Color")
-                        Spacer()
-                        ColorPicker("", selection: $modelColor)
-                            .labelsHidden()
-                    }
-                    
                     // Scale Control
                     VStack(alignment: .leading) {
                         HStack {
                             Image(systemName: "arrow.up.left.and.arrow.down.right")
                             Text("Size")
                             Spacer()
+                            // 2. THE TRIGGER:
+                            // The Slider is bound to '$modelScale'. When you move it, 'modelScale' updates.
+                            // This notifies the system, which triggers the 'update' closure above.
                             Slider(value: $modelScale, in: 0.5...3.0)
                             Text("\(String(format: "%.1f", modelScale))x")
                                 .monospacedDigit()
@@ -136,15 +253,56 @@ struct HomeView: View {
                     
                     Divider()
                     
-                    // Rotation Controls
-                    Text("Rotation")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    // Color Control
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                        Text("TARDIS Color")
+                        Spacer()
+                        ColorPicker("", selection: $modelColor)
+                            .labelsHidden()
+                    }
                     
-                    rotationControl(axis: "X", value: $rotationX)
-                    rotationControl(axis: "Y", value: $rotationY)
-                    rotationControl(axis: "Z", value: $rotationZ)
+                    // Window Color Control
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                        Text("Front Window Color")
+                        Spacer()
+                        ColorPicker("", selection: $frontWindowColor)
+                            .labelsHidden()
+                    }
+                    // Top Light Control
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                        Text("Top Light Color")
+                        Spacer()
+                        ColorPicker("", selection: $topLightColor)
+                            .labelsHidden()
+                    }
+                    // Left Window
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                        Text("Left Window Color")
+                        Spacer()
+                        ColorPicker("", selection: $leftWindowColor)
+                            .labelsHidden()
+                    }
+                    // Right Window
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                        Text("Right Window Color")
+                        Spacer()
+                        ColorPicker("", selection: $rightWindowColor)
+                            .labelsHidden()
+                    }
+                    // Back Window
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                        Text("Rear Window Color")
+                        Spacer()
+                        ColorPicker("", selection: $rearWindowColor)
+                            .labelsHidden()
+                    }
+                    
                 }
                 .padding()
             }
@@ -167,6 +325,24 @@ struct HomeView: View {
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
             }
+        }
+    }
+    
+    // Helper to print cached parts
+    private func printCache(_ parts: [String: Entity]) {
+        print("--- Cached Model Parts (\(parts.count)) ---")
+        for (name, _) in parts {
+            print("Part found: \(name)")
+        }
+        print("----------------------------------")
+    }
+    
+    // Debug helper to print model structure
+    private func printHierarchy(entity: Entity, depth: Int) {
+        let indent = String(repeating: "  ", count: depth)
+        print("\(indent)- \(entity.name)")
+        for child in entity.children {
+            printHierarchy(entity: child, depth: depth + 1)
         }
     }
 }
