@@ -8,6 +8,9 @@
 import SwiftUI
 import RealityKit
 internal import Combine
+import TARDISAPIClient
+import OpenAPIRuntime
+import OpenAPIURLSession
 
 struct ContentView: View {
     var body: some View {
@@ -42,6 +45,12 @@ struct HomeView: View {
     @State private var rotationZ: Double = 0
     
     @State private var modelParts: [String: Entity] = [:]
+    
+    // API Client Setup
+    private let client = Client(
+        serverURL: URL(string: "http://192.168.1.161")!,
+        transport: URLSessionTransport()
+    )
     
     // Gesture State Variables
     @State private var lastDragTranslation: CGSize = .zero
@@ -277,6 +286,21 @@ struct HomeView: View {
                         Spacer()
                         ColorPicker("", selection: $topLightColor)
                             .labelsHidden()
+                            .onChange(of: topLightColor) { _, newColor in
+                                Task {
+                                    let components = newColor.rgbComponents
+                                    let body = Components.Schemas.Color(
+                                        r: components.r,
+                                        g: components.g,
+                                        b: components.b
+                                    )
+                                    do {
+                                        _ = try await client.set_color_api_led_color_post(body: .json(body))
+                                    } catch {
+                                        print("Failed to set LED color: \(error)")
+                                    }
+                                }
+                            }
                     }
                     // Left Window
                     HStack {
@@ -344,6 +368,25 @@ struct HomeView: View {
         for child in entity.children {
             printHierarchy(entity: child, depth: depth + 1)
         }
+    }
+}
+
+// MARK: - Color Extension
+extension Color {
+    var rgbComponents: (r: Int, g: Int, b: Int) {
+        let uiColor = UIColor(self)
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        
+        uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        return (
+            r: Int(max(0, min(255, r * 255))),
+            g: Int(max(0, min(255, g * 255))),
+            b: Int(max(0, min(255, b * 255)))
+        )
     }
 }
 
