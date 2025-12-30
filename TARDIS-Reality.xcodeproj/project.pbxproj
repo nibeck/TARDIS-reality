@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3E9A5BA52F02EC610074EE7B /* TARDISAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3E9A5BA42F02EC610074EE7B /* TARDISAPIClient */; };
+		3E9A5BAA2F0308C10074EE7B /* TARDISAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3E9A5BA92F0308C10074EE7B /* TARDISAPIClient */; };
 		3EEB75812EFC2A3C008274B3 /* Simple TARDIS.usdc in Resources */ = {isa = PBXBuildFile; fileRef = 3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */; };
 /* End PBXBuildFile section */
 
@@ -57,6 +59,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E9A5BA52F02EC610074EE7B /* TARDISAPIClient in Frameworks */,
+				3E9A5BAA2F0308C10074EE7B /* TARDISAPIClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +122,8 @@
 			);
 			name = "TARDIS-Reality";
 			packageProductDependencies = (
+				3E9A5BA42F02EC610074EE7B /* TARDISAPIClient */,
+				3E9A5BA92F0308C10074EE7B /* TARDISAPIClient */,
 			);
 			productName = "TARDIS-Reality";
 			productReference = 3E3F16F72EFC20630052D0A4 /* TARDIS-Reality.app */;
@@ -201,6 +207,9 @@
 			);
 			mainGroup = 3E3F16EE2EFC20630052D0A4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3E9A5BA82F0308C10074EE7B /* XCLocalSwiftPackageReference "../TARDISAPIClient" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3E3F16F82EFC20630052D0A4 /* Products */;
 			projectDirPath = "";
@@ -585,6 +594,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3E9A5BA82F0308C10074EE7B /* XCLocalSwiftPackageReference "../TARDISAPIClient" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../TARDISAPIClient;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3E9A5BA42F02EC610074EE7B /* TARDISAPIClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TARDISAPIClient;
+		};
+		3E9A5BA92F0308C10074EE7B /* TARDISAPIClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TARDISAPIClient;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3E3F16EF2EFC20630052D0A4 /* Project object */;
 }
