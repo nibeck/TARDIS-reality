@@ -1,0 +1,575 @@
+{
+  "paths" : {
+    "\/api\/available-sounds" : {
+      "get" : {
+        "summary" : "Get Sounds",
+        "operationId" : "get_sounds_api_available_sounds_get",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#\/components\/schemas\/Sound"
+                  },
+                  "type" : "array",
+                  "title" : "Response Get Sounds Api Available Sounds Get"
+                }
+              }
+            },
+            "description" : "Successful Response"
+          }
+        }
+      }
+    },
+    "\/api\/play-sound\/{file_name}" : {
+      "post" : {
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "file_name",
+            "required" : true,
+            "schema" : {
+              "type" : "string",
+              "title" : "File Name"
+            }
+          }
+        ],
+        "operationId" : "play_sound_api_play_sound__file_name__post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "summary" : "Play Sound"
+      }
+    },
+    "\/api\/led\/pulse" : {
+      "post" : {
+        "operationId" : "pulse_api_led_pulse_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application\/json" : {
+              "schema" : {
+                "$ref" : "#\/components\/schemas\/PulseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "summary" : "Pulse"
+      }
+    },
+    "\/api\/led\/on" : {
+      "post" : {
+        "operationId" : "turn_on_api_led_on_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application\/json" : {
+              "schema" : {
+                "$ref" : "#\/components\/schemas\/TurnOnRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "summary" : "Turn On"
+      }
+    },
+    "\/api\/scenes" : {
+      "get" : {
+        "summary" : "Get Scenes",
+        "operationId" : "get_scenes_api_scenes_get",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          }
+        }
+      }
+    },
+    "\/api\/scenes\/{scene_name}\/play" : {
+      "post" : {
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "scene_name",
+            "required" : true,
+            "schema" : {
+              "type" : "string",
+              "title" : "Scene Name"
+            }
+          }
+        ],
+        "operationId" : "play_scene_api_scenes__scene_name__play_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "summary" : "Play Scene"
+      }
+    },
+    "\/api\/led\/sections" : {
+      "get" : {
+        "summary" : "Get Led Sections",
+        "operationId" : "get_led_sections_api_led_sections_get",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#\/components\/schemas\/LEDSection"
+                  },
+                  "type" : "array",
+                  "title" : "Response Get Led Sections Api Led Sections Get"
+                }
+              }
+            },
+            "description" : "Successful Response"
+          }
+        }
+      }
+    },
+    "\/api\/stop-sound" : {
+      "post" : {
+        "summary" : "Stop Sound",
+        "operationId" : "stop_sound_api_stop_sound_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          }
+        }
+      }
+    },
+    "\/api\/led\/color" : {
+      "post" : {
+        "operationId" : "set_color_api_led_color_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application\/json" : {
+              "schema" : {
+                "$ref" : "#\/components\/schemas\/SetColorRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "summary" : "Set Color"
+      }
+    },
+    "\/api\/led\/rainbow" : {
+      "post" : {
+        "operationId" : "rainbow_api_led_rainbow_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application\/json" : {
+              "schema" : {
+                "$ref" : "#\/components\/schemas\/RainbowRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "summary" : "Rainbow"
+      }
+    },
+    "\/api\/led\/off" : {
+      "post" : {
+        "operationId" : "turn_off_api_led_off_post",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          },
+          "422" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/HTTPValidationError"
+                }
+              }
+            },
+            "description" : "Validation Error"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application\/json" : {
+              "schema" : {
+                "$ref" : "#\/components\/schemas\/TurnOffRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "summary" : "Turn Off"
+      }
+    },
+    "\/" : {
+      "get" : {
+        "summary" : "Read Root",
+        "operationId" : "read_root__get",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application\/json" : {
+                "schema" : {
+
+                }
+              }
+            },
+            "description" : "Successful Response"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "RainbowRequest" : {
+        "type" : "object",
+        "properties" : {
+          "section" : {
+            "type" : "string",
+            "title" : "Section",
+            "default" : ""
+          },
+          "duration" : {
+            "type" : "number",
+            "title" : "Duration",
+            "default" : 5
+          }
+        },
+        "title" : "RainbowRequest"
+      },
+      "SetColorRequest" : {
+        "properties" : {
+          "color" : {
+            "$ref" : "#\/components\/schemas\/Color"
+          },
+          "section" : {
+            "type" : "string",
+            "title" : "Section",
+            "default" : ""
+          }
+        },
+        "title" : "SetColorRequest",
+        "type" : "object",
+        "required" : [
+          "color"
+        ]
+      },
+      "TurnOffRequest" : {
+        "type" : "object",
+        "properties" : {
+          "section" : {
+            "type" : "string",
+            "title" : "Section",
+            "default" : ""
+          }
+        },
+        "title" : "TurnOffRequest"
+      },
+      "Color" : {
+        "properties" : {
+          "r" : {
+            "type" : "integer",
+            "title" : "R"
+          },
+          "g" : {
+            "type" : "integer",
+            "title" : "G"
+          },
+          "b" : {
+            "type" : "integer",
+            "title" : "B"
+          }
+        },
+        "title" : "Color",
+        "type" : "object",
+        "required" : [
+          "r",
+          "g",
+          "b"
+        ]
+      },
+      "HTTPValidationError" : {
+        "type" : "object",
+        "properties" : {
+          "detail" : {
+            "items" : {
+              "$ref" : "#\/components\/schemas\/ValidationError"
+            },
+            "type" : "array",
+            "title" : "Detail"
+          }
+        },
+        "title" : "HTTPValidationError"
+      },
+      "LEDSection" : {
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "title" : "Name"
+          },
+          "count" : {
+            "type" : "integer",
+            "title" : "Count"
+          }
+        },
+        "title" : "LEDSection",
+        "type" : "object",
+        "required" : [
+          "name",
+          "count"
+        ]
+      },
+      "ValidationError" : {
+        "properties" : {
+          "loc" : {
+            "items" : {
+              "anyOf" : [
+                {
+                  "type" : "string"
+                },
+                {
+                  "type" : "integer"
+                }
+              ]
+            },
+            "type" : "array",
+            "title" : "Location"
+          },
+          "msg" : {
+            "type" : "string",
+            "title" : "Message"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "Error Type"
+          }
+        },
+        "title" : "ValidationError",
+        "type" : "object",
+        "required" : [
+          "loc",
+          "msg",
+          "type"
+        ]
+      },
+      "PulseRequest" : {
+        "type" : "object",
+        "properties" : {
+          "color" : {
+            "anyOf" : [
+              {
+                "$ref" : "#\/components\/schemas\/Color"
+              },
+              {
+                "type" : "null"
+              }
+            ]
+          },
+          "duration" : {
+            "type" : "number",
+            "title" : "Duration",
+            "default" : 1
+          },
+          "section" : {
+            "type" : "string",
+            "title" : "Section",
+            "default" : ""
+          }
+        },
+        "title" : "PulseRequest"
+      },
+      "TurnOnRequest" : {
+        "type" : "object",
+        "properties" : {
+          "color" : {
+            "anyOf" : [
+              {
+                "$ref" : "#\/components\/schemas\/Color"
+              },
+              {
+                "type" : "null"
+              }
+            ]
+          },
+          "section" : {
+            "type" : "string",
+            "title" : "Section",
+            "default" : ""
+          }
+        },
+        "title" : "TurnOnRequest"
+      },
+      "Sound" : {
+        "properties" : {
+          "friendlyName" : {
+            "type" : "string",
+            "title" : "Friendlyname"
+          },
+          "fileName" : {
+            "type" : "string",
+            "title" : "Filename"
+          }
+        },
+        "title" : "Sound",
+        "type" : "object",
+        "required" : [
+          "fileName",
+          "friendlyName"
+        ]
+      }
+    }
+  },
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "FastAPI",
+    "version" : "0.1.0"
+  }
+}

@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3E9A5BA52F02EC610074EE7B /* TARDISAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3E9A5BA42F02EC610074EE7B /* TARDISAPIClient */; };
-		3E9A5BAA2F0308C10074EE7B /* TARDISAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3E9A5BA92F0308C10074EE7B /* TARDISAPIClient */; };
+		3E6C51A22F04877900F7F441 /* TARDISAPI-Client in Frameworks */ = {isa = PBXBuildFile; productRef = 3E6C51A12F04877900F7F441 /* TARDISAPI-Client */; };
+		3EBE76442F04315500EB0B04 /* openapi.json in Resources */ = {isa = PBXBuildFile; fileRef = 3EBE76432F04315500EB0B04 /* openapi.json */; };
 		3EEB75812EFC2A3C008274B3 /* Simple TARDIS.usdc in Resources */ = {isa = PBXBuildFile; fileRef = 3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +33,7 @@
 		3E3F16F72EFC20630052D0A4 /* TARDIS-Reality.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TARDIS-Reality.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E3F17042EFC20650052D0A4 /* TARDIS-RealityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TARDIS-RealityTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E3F170E2EFC20650052D0A4 /* TARDIS-RealityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TARDIS-RealityUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EBE76432F04315500EB0B04 /* openapi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapi.json; sourceTree = "<group>"; };
 		3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Simple TARDIS.usdc"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,8 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3E9A5BA52F02EC610074EE7B /* TARDISAPIClient in Frameworks */,
-				3E9A5BAA2F0308C10074EE7B /* TARDISAPIClient in Frameworks */,
+				3E6C51A22F04877900F7F441 /* TARDISAPI-Client in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +89,8 @@
 				3E3F17112EFC20650052D0A4 /* TARDIS-RealityUITests */,
 				3E3F16F82EFC20630052D0A4 /* Products */,
 				3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */,
+				3EBE76432F04315500EB0B04 /* openapi.json */,
+				3E6C519E2F04873A00F7F441 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -100,6 +102,13 @@
 				3E3F170E2EFC20650052D0A4 /* TARDIS-RealityUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3E6C519E2F04873A00F7F441 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -122,8 +131,7 @@
 			);
 			name = "TARDIS-Reality";
 			packageProductDependencies = (
-				3E9A5BA42F02EC610074EE7B /* TARDISAPIClient */,
-				3E9A5BA92F0308C10074EE7B /* TARDISAPIClient */,
+				3E6C51A12F04877900F7F441 /* TARDISAPI-Client */,
 			);
 			productName = "TARDIS-Reality";
 			productReference = 3E3F16F72EFC20630052D0A4 /* TARDIS-Reality.app */;
@@ -208,7 +216,7 @@
 			mainGroup = 3E3F16EE2EFC20630052D0A4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3E9A5BA82F0308C10074EE7B /* XCLocalSwiftPackageReference "../TARDISAPIClient" */,
+				3E6C51802F04785200F7F441 /* XCLocalSwiftPackageReference "../TARDIS-API" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3E3F16F82EFC20630052D0A4 /* Products */;
@@ -228,6 +236,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3EEB75812EFC2A3C008274B3 /* Simple TARDIS.usdc in Resources */,
+				3EBE76442F04315500EB0B04 /* openapi.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,20 +605,17 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		3E9A5BA82F0308C10074EE7B /* XCLocalSwiftPackageReference "../TARDISAPIClient" */ = {
+		3E6C51802F04785200F7F441 /* XCLocalSwiftPackageReference "../TARDIS-API" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../TARDISAPIClient;
+			relativePath = "../TARDIS-API";
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3E9A5BA42F02EC610074EE7B /* TARDISAPIClient */ = {
+		3E6C51A12F04877900F7F441 /* TARDISAPI-Client */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = TARDISAPIClient;
-		};
-		3E9A5BA92F0308C10074EE7B /* TARDISAPIClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = TARDISAPIClient;
+			package = 3E6C51802F04785200F7F441 /* XCLocalSwiftPackageReference "../TARDIS-API" */;
+			productName = "TARDISAPI-Client";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

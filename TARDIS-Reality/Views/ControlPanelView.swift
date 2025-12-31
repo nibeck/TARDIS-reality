@@ -1,14 +1,8 @@
 import SwiftUI
-import TARDISAPIClient
+import Observation
 
 struct ControlPanelView: View {
-    @Binding var modelScale: Double
-    @Binding var modelColor: Color
-    @Binding var frontWindowColor: Color
-    @Binding var topLightColor: Color
-    @Binding var leftWindowColor: Color
-    @Binding var rightWindowColor: Color
-    @Binding var rearWindowColor: Color
+    @Bindable var viewModel: TardisViewModel
     
     var body: some View {
         ScrollView {
@@ -25,8 +19,8 @@ struct ControlPanelView: View {
                         Image(systemName: "arrow.up.left.and.arrow.down.right")
                         Text("Size")
                         Spacer()
-                        Slider(value: $modelScale, in: 0.5...3.0)
-                        Text("\(String(format: "%.1f", modelScale))x")
+                        Slider(value: $viewModel.modelScale, in: 0.5...3.0)
+                        Text("\(String(format: "%.1f", viewModel.modelScale))x")
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
                     }
@@ -34,12 +28,20 @@ struct ControlPanelView: View {
                 
                 Divider()
                 
+                HStack {
+                    Image(systemName: "power")
+                    Text("All Lights")
+                    Spacer()
+                    Toggle("All On/Off", isOn: $viewModel.allOnOff)
+                        .labelsHidden()
+                }
+                Divider()
                 // Color Control
                 HStack {
                     Image(systemName: "paintpalette.fill")
                     Text("TARDIS Color")
                     Spacer()
-                    ColorPicker("", selection: $modelColor)
+                    ColorPicker("", selection: $viewModel.modelColor)
                         .labelsHidden()
                 }
                 
@@ -48,7 +50,7 @@ struct ControlPanelView: View {
                     Image(systemName: "paintpalette.fill")
                     Text("Front Window Color")
                     Spacer()
-                    ColorPicker("", selection: $frontWindowColor)
+                    ColorPicker("", selection: $viewModel.frontWindowColor)
                         .labelsHidden()
                 }
                 
@@ -57,11 +59,8 @@ struct ControlPanelView: View {
                     Image(systemName: "paintpalette.fill")
                     Text("Top Light Color")
                     Spacer()
-                    ColorPicker("", selection: $topLightColor)
+                    ColorPicker("", selection: $viewModel.topLightColor)
                         .labelsHidden()
-                        .onChange(of: topLightColor) { _, newColor in
-                            TARDISManager.shared.setTopLightColor(newColor)
-                        }
                 }
                 
                 // Left Window
@@ -69,7 +68,7 @@ struct ControlPanelView: View {
                     Image(systemName: "paintpalette.fill")
                     Text("Left Window Color")
                     Spacer()
-                    ColorPicker("", selection: $leftWindowColor)
+                    ColorPicker("", selection: $viewModel.leftWindowColor)
                         .labelsHidden()
                 }
                 
@@ -78,7 +77,7 @@ struct ControlPanelView: View {
                     Image(systemName: "paintpalette.fill")
                     Text("Right Window Color")
                     Spacer()
-                    ColorPicker("", selection: $rightWindowColor)
+                    ColorPicker("", selection: $viewModel.rightWindowColor)
                         .labelsHidden()
                 }
                 
@@ -87,7 +86,7 @@ struct ControlPanelView: View {
                     Image(systemName: "paintpalette.fill")
                     Text("Rear Window Color")
                     Spacer()
-                    ColorPicker("", selection: $rearWindowColor)
+                    ColorPicker("", selection: $viewModel.rearWindowColor)
                         .labelsHidden()
                 }
             }
