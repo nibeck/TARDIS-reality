@@ -22,7 +22,7 @@ struct AudioFile: Identifiable, Hashable, Sendable {
 }
 
 /// Represents a lighting scene available on the TARDIS
-struct Scene: Identifiable, Hashable, Sendable {
+struct AnimatedScene: Identifiable, Hashable, Sendable {
     var id: String { name }
     let name: String
     let description: String
@@ -46,7 +46,7 @@ class TARDISManager {
     
     var sections: [Components.Schemas.LEDSection] = []
     var availableSounds: [AudioFile] = []
-    var availableScenes: [Scene] = []
+    var availableScenes: [AnimatedScene] = []
     var currentlyPlayingSound: AudioFile?
     
     private let client: Client
@@ -124,28 +124,15 @@ class TARDISManager {
                 switch response {
                 case .ok(let okResponse):
                     switch okResponse.body {
-                    case .json(let json):
-                        // Parse the OpenAPIValueContainer to extract scenes
-                        // We must cast the value to `OpenAPIValue` (an enum) to switch on it.
-                        if let value = json.value as? OpenAPIValue, 
-                           case .object(let object) = value,
-                           let scenesValue = object["scenes"],
-                           case .array(let scenesArray) = scenesValue {
-                            
-                            self.availableScenes = scenesArray.compactMap { sceneValue -> Scene? in
-                                guard case .object(let sceneDict) = sceneValue,
-                                      let nameValue = sceneDict["name"],
-                                      case .string(let name) = nameValue,
-                                      let descriptionValue = sceneDict["description"],
-                                      case .string(let description) = descriptionValue else {
-                                    return nil
-                                }
-                                return Scene(name: name, description: description)
-                            }
-                            print("Successfully fetched \(self.availableScenes.count) scenes")
-                        } else {
-                            print("Failed to parse scenes: Unexpected structure or types")
+                    case .json(let sceneList):
+                        // Map the generated SceneList to our local Scene struct.
+                        self.availableScenes = sceneList.scenes.map { scene in
+                            AnimatedScene(
+                                name: scene.name,
+                                description: scene.description
+                            )
                         }
+                        print("Successfully fetched \(self.availableScenes.count) scenes")
                     }
                 case .undocumented(let statusCode, _):
                     print("Failed to fetch scenes: Undocumented status code \(statusCode)")

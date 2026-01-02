@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct TardisContentView: View {
     // State is now owned by the parent view
     @State private var viewModel = TardisViewModel()
     
@@ -37,5 +37,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    TardisContentView()
 }

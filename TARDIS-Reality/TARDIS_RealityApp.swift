@@ -9,12 +9,10 @@ import SwiftUI
 
 @main
 struct TARDIS_RealityApp: App {
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TardisContentView()
         }
     }
 }
-
-// TODO: Add scenes tab along bottom, populate from API
-// TODO: Look into unit tests
