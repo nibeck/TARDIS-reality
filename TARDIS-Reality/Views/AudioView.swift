@@ -8,8 +8,34 @@
 import SwiftUI
 
 struct AudioView: View {
+    // TARDISManager is a singleton and @Observable. 
+    // Accessing properties in the body will automatically subscribe to changes.
+    private var manager = TARDISManager.shared
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            List(manager.availableSounds, id: \.self) { sound in
+                HStack {
+                    Text(sound.friendlyName)
+                    Spacer()
+                    if manager.currentlyPlayingSound == sound {
+                        Image(systemName: "stop.fill")
+                            .foregroundStyle(.red)
+                    } else {
+                        Image(systemName: "play")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .contentShape(Rectangle()) // Makes the entire row tappable
+                .onTapGesture {
+                    manager.playSound(sound: sound)
+                }
+            }
+            .navigationTitle("Audio")
+            .refreshable {
+                manager.fetchSounds()
+            }
+        }
     }
 }
 

@@ -5,8 +5,28 @@ import TARDISAPIClient
 import OpenAPIRuntime
 import OpenAPIURLSession
 
-// TODO: API structure. JSON body or query params for Section value
+/// Represents an audio file available on the TARDIS
+struct AudioFile: Identifiable, Hashable, Sendable {
+    let id = UUID()
+    let friendlyName: String
+    let fileName: String
+    
+    // Custom equality based on fileName to maintain state across fetches
+    static func == (lhs: AudioFile, rhs: AudioFile) -> Bool {
+        return lhs.fileName == rhs.fileName
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(fileName)
+    }
+}
 
+/// Represents a lighting scene available on the TARDIS
+struct AnimatedScene: Identifiable, Hashable, Sendable {
+    var id: String { name }
+    let name: String
+    let description: String
+}
 
 @MainActor
 @Observable
@@ -25,6 +45,9 @@ class TARDISManager {
     }
     
     var sections: [Components.Schemas.LEDSection] = []
+    var availableSounds: [AudioFile] = []
+    var availableScenes: [AnimatedScene] = []
+    var currentlyPlayingSound: AudioFile?
     
     private let client: Client
     
@@ -35,9 +58,15 @@ class TARDISManager {
         )
         // Initial fetch
         fetchSections()
+        fetchSounds()
+        fetchScenes()
     }
     
     func fetchSections() {
+        
+        guard sections.isEmpty else {
+            return
+        }
         Task {
             do {
                 let response = try await client.get_led_sections_api_led_sections_get()
@@ -48,8 +77,8 @@ class TARDISManager {
                         self.sections = fetchedSections
                         print("Successfully fetched \(sections.count) LED sections")
                     }
-                default:
-                    print("Failed to fetch sections: Unexpected response")
+                case .undocumented(let statusCode, _):
+                    print("Failed to fetch sections: Undocumented status code \(statusCode)")
                 }
             } catch {
                 print("Failed to fetch LED sections: \(error)")
@@ -57,6 +86,53 @@ class TARDISManager {
         }
     }
     
+    func fetchSounds() {
+        // If sounds have already been fetched, skip the API call.
+        guard availableSounds.isEmpty else {
+            return
+        }
+
+        Task {
+            do {
+                let response = try await client.get_sounds_api_sounds_get()
+                
+                switch response {
+                case .ok(let okResponse):
+                    switch okResponse.body {
+                    case .json(let sounds):
+                        // Map the generated API types to our AudioFile struct.
+                        // Check generated properties: usually 'friendlyName' and 'filename'
+                        self.availableSounds = sounds.map { sound in
+                            AudioFile(
+                                friendlyName: sound.friendlyName,
+                                fileName: sound.fileName
+                            )
+                        }
+                        print("Successfully fetched \(self.availableSounds.count) sounds")
+                    }
+                case .undocumented(let statusCode, _):
+                    print("Failed to fetch sounds: Undocumented status code \(statusCode)")
+                }
+            } catch {
+                print("Failed to fetch sounds: \(error)")
+            }
+        }
+    }
+    
+
+    func playScene(named sceneName: String) {
+        Task {
+            do {
+                _ = try await client.play_scene_api_scenes__scene_name__play_post(
+                    path: .init(scene_name: sceneName)
+                )
+                print("Playing scene: \(sceneName)")
+            } catch {
+                print("Failed to play scene \(sceneName): \(error)")
+            }
+        }
+    }
+
     /// Generic function to set the color of a specific LED section
     func setLightColor(for section: LEDSection, color: Color) {
         Task {
@@ -145,6 +221,66 @@ class TARDISManager {
         }
     }
     
-    // Future API methods can be added here
-    // func playSound(name: String) { ... }
+    func playSound(sound: AudioFile) {
+        // If the sound is already playing, stop it.
+        if currentlyPlayingSound == sound {
+            stopSound()
+            return
+        }
+        
+        // Optimistically update UI
+        self.currentlyPlayingSound = sound
+        
+        Task {
+            do {
+                // The generated API expects the file name as a path parameter, not a JSON body.
+                _ = try await client.play_sound_api_play_sound__file_name__post(
+                    path: .init(file_name: sound.fileName)
+                )
+                print("Playing sound: \(sound.friendlyName)")
+            } catch {
+                print("Failed to play sound: \(error)")
+                self.currentlyPlayingSound = nil
+            }
+        }
+    }
+    
+    func stopSound() {
+        self.currentlyPlayingSound = nil
+        
+        Task {
+            do {
+                _ = try await client.stop_sound_api_stop_sound_post()
+                print("Stopped playback")
+            } catch {
+                print("Failed to stop playback: \(error)")
+            }
+        }
+    }
+    func fetchScenes() {
+        Task {
+            do {
+                let response = try await client.get_scenes_api_scenes_get()
+                
+                switch response {
+                case .ok(let okResponse):
+                    switch okResponse.body {
+                    case .json(let sceneData):
+                        // Map the API scenes to our AnimatedScene struct using the provided schema
+                        self.availableScenes = sceneData.scenes.map { scene in
+                            AnimatedScene(
+                                name: scene.name,
+                                description: scene.description
+                            )
+                        }
+                        print("Successfully fetched \(self.availableScenes.count) scenes")
+                    }
+                case .undocumented(let statusCode, _):
+                    print("Failed to fetch scenes: Undocumented status code \(statusCode)")
+                }
+            } catch {
+                print("Failed to fetch scenes: \(error)")
+            }
+        }
+    }
 }

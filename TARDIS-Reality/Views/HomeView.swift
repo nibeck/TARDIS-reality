@@ -3,9 +3,10 @@ import RealityKit
 import Combine
 import Observation
 
-struct HomeView: View {
-    // The ViewModel holds the state and handles API side-effects
-    @State private var viewModel = TardisViewModel()
+// Renamed from HomeView to reflect that it is now just the 3D container
+struct Tardis3DView: View {
+    // The ViewModel is now passed in from the parent, sharing state with the controls
+    var viewModel: TardisViewModel
     
     // Initial Rotation state variables (Degrees) - View-specific state
     @State private var rotationX: Double = 103
@@ -22,16 +23,8 @@ struct HomeView: View {
     let timer = Timer.publish(every: 0.02, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        VStack(spacing: 0) {
-            // MARK: - Top: 3D RealityKit View
-            tardis3DView
-            
-            // MARK: - Bottom: Standard SwiftUI Controls
-            // Pass the entire model instead of 8 separate bindings
-            ControlPanelView(viewModel: viewModel)
-                .background(.regularMaterial)
-        }
-        .ignoresSafeArea(.all, edges: .top)
+        // MARK: - Top: 3D RealityKit View
+        tardis3DView
     }
     
     // MARK: - Subviews
