@@ -22,7 +22,7 @@ struct AudioFile: Identifiable, Hashable, Sendable {
 }
 
 /// Represents a lighting scene available on the TARDIS
-struct AnimatedScene: Identifiable, Hashable, Sendable {
+struct Scene: Identifiable, Hashable, Sendable {
     var id: String { name }
     let name: String
     let description: String
@@ -32,7 +32,7 @@ struct AnimatedScene: Identifiable, Hashable, Sendable {
 @Observable
 class TARDISManager {
 
-     static let shared = TARDISManager()
+    static let shared = TARDISManager()
     
     // Enum representing the physical sections of LEDs on the TARDIS
     enum LEDSection: String, CaseIterable, Sendable {
@@ -46,12 +46,12 @@ class TARDISManager {
     
     var sections: [Components.Schemas.LEDSection] = []
     var availableSounds: [AudioFile] = []
-    var availableScenes: [AnimatedScene] = []
+    var availableScenes: [Scene] = []
     var currentlyPlayingSound: AudioFile?
     
     private let client: Client
     
-    init(serverURL: String = "http://192.168.1.161") {
+    private init(serverURL: String = "http://192.168.1.161") {
         self.client = Client(
             serverURL: URL(string: serverURL)!,
             transport: URLSessionTransport()
@@ -63,7 +63,6 @@ class TARDISManager {
     }
     
     func fetchSections() {
-        
         guard sections.isEmpty else {
             return
         }
@@ -101,7 +100,6 @@ class TARDISManager {
                     switch okResponse.body {
                     case .json(let sounds):
                         // Map the generated API types to our AudioFile struct.
-                        // Check generated properties: usually 'friendlyName' and 'filename'
                         self.availableSounds = sounds.map { sound in
                             AudioFile(
                                 friendlyName: sound.friendlyName,
@@ -119,7 +117,45 @@ class TARDISManager {
         }
     }
     
-
+    func fetchScenes() {
+        Task {
+            do {
+                let response = try await client.get_scenes_api_scenes_get()
+                switch response {
+                case .ok(let okResponse):
+                    switch okResponse.body {
+                    case .json(let json):
+                        // Parse the OpenAPIValueContainer to extract scenes
+                        // We must cast the value to `OpenAPIValue` (an enum) to switch on it.
+                        if let value = json.value as? OpenAPIValue, 
+                           case .object(let object) = value,
+                           let scenesValue = object["scenes"],
+                           case .array(let scenesArray) = scenesValue {
+                            
+                            self.availableScenes = scenesArray.compactMap { sceneValue -> Scene? in
+                                guard case .object(let sceneDict) = sceneValue,
+                                      let nameValue = sceneDict["name"],
+                                      case .string(let name) = nameValue,
+                                      let descriptionValue = sceneDict["description"],
+                                      case .string(let description) = descriptionValue else {
+                                    return nil
+                                }
+                                return Scene(name: name, description: description)
+                            }
+                            print("Successfully fetched \(self.availableScenes.count) scenes")
+                        } else {
+                            print("Failed to parse scenes: Unexpected structure or types")
+                        }
+                    }
+                case .undocumented(let statusCode, _):
+                    print("Failed to fetch scenes: Undocumented status code \(statusCode)")
+                }
+            } catch {
+                print("Failed to fetch scenes: \(error)")
+            }
+        }
+    }
+    
     func playScene(named sceneName: String) {
         Task {
             do {
@@ -187,7 +223,6 @@ class TARDISManager {
                 // Treat .all as nil (all sections) for the turn on request if the API supports nil for all
                 let sectionValue = (section == .all) ? nil : section?.rawValue
                 
-                // 'section' is part of the JSON body here
                 let body = Components.Schemas.TurnOnRequest(
                     section: sectionValue
                 )
@@ -204,11 +239,8 @@ class TARDISManager {
     func turnOff(section: LEDSection? = nil) {
         Task {
             do {
-                // Treat .all as nil (all sections) for the turn on request if the API supports nil for all
                 let sectionValue = (section == .all) ? nil : section?.rawValue
                 
-                // Attempt to reuse TurnOnRequest if the schema is the same.
-                // If the compiler errors here, Cmd+Click 'turn_on_api_led_off_post' to see the expected input type.
                 let body = Components.Schemas.TurnOffRequest(
                     section: sectionValue
                 )
@@ -233,7 +265,6 @@ class TARDISManager {
         
         Task {
             do {
-                // The generated API expects the file name as a path parameter, not a JSON body.
                 _ = try await client.play_sound_api_play_sound__file_name__post(
                     path: .init(file_name: sound.fileName)
                 )
@@ -254,32 +285,6 @@ class TARDISManager {
                 print("Stopped playback")
             } catch {
                 print("Failed to stop playback: \(error)")
-            }
-        }
-    }
-    func fetchScenes() {
-        Task {
-            do {
-                let response = try await client.get_scenes_api_scenes_get()
-                
-                switch response {
-                case .ok(let okResponse):
-                    switch okResponse.body {
-                    case .json(let sceneData):
-                        // Map the API scenes to our AnimatedScene struct using the provided schema
-                        self.availableScenes = sceneData.scenes.map { scene in
-                            AnimatedScene(
-                                name: scene.name,
-                                description: scene.description
-                            )
-                        }
-                        print("Successfully fetched \(self.availableScenes.count) scenes")
-                    }
-                case .undocumented(let statusCode, _):
-                    print("Failed to fetch scenes: Undocumented status code \(statusCode)")
-                }
-            } catch {
-                print("Failed to fetch scenes: \(error)")
             }
         }
     }
