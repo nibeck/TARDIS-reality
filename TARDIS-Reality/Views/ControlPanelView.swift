@@ -14,19 +14,17 @@ struct ControlPanelView: View {
                 Divider()
                 
                 // Scale Control
-                VStack(alignment: .leading) {
-                    HStack {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        Text("Size")
-                        Spacer()
-                        Slider(value: $viewModel.modelScale, in: 0.5...3.0)
-                        Text("\(String(format: "%.1f", viewModel.modelScale))x")
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                
-                Divider()
+//                VStack(alignment: .leading) {
+//                    HStack {
+//                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+//                        Text("Size")
+//                        Spacer()
+//                        Slider(value: $viewModel.modelScale, in: 0.5...3.0)
+//                        Text("\(String(format: "%.1f", viewModel.modelScale))x")
+//                            .monospacedDigit()
+//                            .foregroundStyle(.secondary)
+//                    }
+//                }
                 
                 HStack {
                     Image(systemName: "power")
@@ -36,14 +34,26 @@ struct ControlPanelView: View {
                         .labelsHidden()
                 }
                 Divider()
-                // Color Control
+                
                 HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("TARDIS Color")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.modelColor)
-                        .labelsHidden()
+                    Button("Test") {
+                        viewModel.runTest()
+                    }
+                    .buttonStyle(.bordered)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
                 }
+                Divider()
+                
+                // Color Control
+//                HStack {
+//                    Image(systemName: "paintpalette.fill")
+//                    Text("TARDIS Color")
+//                    Spacer()
+//                    ColorPicker("", selection: $viewModel.modelColor)
+//                        .labelsHidden()
+//                }
                 
                 // Window Color Control
                 HStack {
@@ -60,6 +70,39 @@ struct ControlPanelView: View {
                     Text("Top Light Color")
                     Spacer()
                     ColorPicker("", selection: $viewModel.topLightColor)
+                        .labelsHidden()
+                }
+                
+                // Front Police Sign
+                HStack {
+                    Image(systemName: "paintpalette.fill")
+                    Text("Front Police Sign")
+                    Spacer()
+                    ColorPicker("", selection: $viewModel.frontPoliceSignColor)
+                        .labelsHidden()
+                }
+                // Left Police Sign
+                HStack {
+                    Image(systemName: "paintpalette.fill")
+                    Text("Left Police Sign")
+                    Spacer()
+                    ColorPicker("", selection: $viewModel.leftPoliceSignColor)
+                        .labelsHidden()
+                }
+                // Rear Police Sign
+                HStack {
+                    Image(systemName: "paintpalette.fill")
+                    Text("Rear Police Sign")
+                    Spacer()
+                    ColorPicker("", selection: $viewModel.rearPoliceSignColor)
+                        .labelsHidden()
+                }
+                // Right Police Sign
+                HStack {
+                    Image(systemName: "paintpalette.fill")
+                    Text("Right Police Sign")
+                    Spacer()
+                    ColorPicker("", selection: $viewModel.rightPoliceSignColor)
                         .labelsHidden()
                 }
                 
@@ -93,4 +136,8 @@ struct ControlPanelView: View {
             .padding()
         }
     }
+}
+
+#Preview {
+    TardisContentView()
 }

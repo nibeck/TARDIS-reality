@@ -122,6 +122,9 @@ class TARDISManager {
     }
     
     func fetchScenes() {
+        guard availableScenes.isEmpty else {
+            return
+        }
         Task {
             do {
                 let response = try await client.get_scenes_api_scenes_get()
@@ -278,5 +281,9 @@ class TARDISManager {
                 print("Failed to stop playback: \(error)")
             }
         }
+    }
+    
+    func runTest() {
+        print("Running test")
     }
 }

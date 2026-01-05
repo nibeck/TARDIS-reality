@@ -36,9 +36,11 @@ struct Tardis3DView: View {
                 let loadedModel = try await Entity(named: "TARDIS")
                 
                 var parts: [String: Entity] = [:]
+                
                 func collectParts(from entity: Entity) {
                     if entity.components.has(ModelComponent.self) {
                         parts[entity.name] = entity
+                        print("Found model part: \(entity.name)")
                     }
                     for child in entity.children {
                         collectParts(from: child)
@@ -92,13 +94,18 @@ struct Tardis3DView: View {
                 let rotY = simd_quatf(angle: Float(rotationY * .pi / 180), axis: [0, 1, 0])
                 let rotZ = simd_quatf(angle: Float(rotationZ * .pi / 180), axis: [0, 0, 1])
                 rootEntity.orientation = rotZ * rotY * rotX
-
+                
+                // Maps from mesh names in USDZ fiel to the appropriate color update function
                 updateMaterial(for: "TARDIS_Mesh", color: viewModel.modelColor)
                 updateMaterial(for: "Front_Windows_Mesh", color: viewModel.frontWindowColor)
                 updateMaterial(for: "Top_Light_Glass_Mesh", color: viewModel.topLightColor)
                 updateMaterial(for: "Left_Windows_Mesh", color: viewModel.leftWindowColor)
                 updateMaterial(for: "Right_Windows_Mesh", color: viewModel.rightWindowColor)
                 updateMaterial(for: "Rear_Windows_Mesh", color: viewModel.rearWindowColor)
+                updateMaterial(for: "PoliceSignLight_Front", color: viewModel.frontPoliceSignColor)
+                updateMaterial(for: "PoliceSignLight_Left", color: viewModel.leftPoliceSignColor)
+                updateMaterial(for: "PoliceSignLight_Rear", color: viewModel.rearPoliceSignColor)
+                updateMaterial(for: "PoliceSignLight_Right", color: viewModel.rightPoliceSignColor)
             }
         }
         .frame(maxHeight: .infinity)
@@ -147,6 +154,7 @@ struct Tardis3DView: View {
             material.color = .init(tint: UIColor(color))
             material.roughness = 0.2
             material.metallic = 0.8
+          //  material.__emissive = .color(color)
             modelComp.materials = [material]
             part.components.set(modelComp)
         }
@@ -197,5 +205,30 @@ class TardisViewModel {
         didSet {
             TARDISManager.shared.setLightColor(for: .rearWindow, color: rearWindowColor)
         }
+    }
+    
+    var frontPoliceSignColor: Color = .white {
+        didSet {
+            TARDISManager.shared.setLightColor(for: .frontPoliceSign, color: frontPoliceSignColor)
+        }
+    }
+    var leftPoliceSignColor: Color = .white {
+        didSet {
+            TARDISManager.shared.setLightColor(for: .leftPoliceSign, color: leftPoliceSignColor)
+        }
+    }
+    var rearPoliceSignColor: Color = .white {
+        didSet {
+            TARDISManager.shared.setLightColor(for: .rearPoliceSign, color: rearPoliceSignColor)
+        }
+    }
+    var rightPoliceSignColor: Color = .white {
+        didSet {
+            TARDISManager.shared.setLightColor(for: .rightPoliceSign, color: rightPoliceSignColor)
+        }
+    }
+    
+    func runTest() {
+        TARDISManager.shared.runTest()
     }
 }
