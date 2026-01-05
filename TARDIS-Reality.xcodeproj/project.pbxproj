@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3EB74C762F072BBA0075A8DC /* TARDISAPI-Client in Frameworks */ = {isa = PBXBuildFile; productRef = 3EB74C752F072BBA0075A8DC /* TARDISAPI-Client */; };
 		3EBE76442F04315500EB0B04 /* openapi.json in Resources */ = {isa = PBXBuildFile; fileRef = 3EBE76432F04315500EB0B04 /* openapi.json */; };
-		3EEB75812EFC2A3C008274B3 /* Simple TARDIS.usdc in Resources */ = {isa = PBXBuildFile; fileRef = 3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +33,6 @@
 		3E3F17042EFC20650052D0A4 /* TARDIS-RealityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TARDIS-RealityTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E3F170E2EFC20650052D0A4 /* TARDIS-RealityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TARDIS-RealityUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EBE76432F04315500EB0B04 /* openapi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapi.json; sourceTree = "<group>"; };
-		3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Simple TARDIS.usdc"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -88,7 +86,6 @@
 				3E3F17072EFC20650052D0A4 /* TARDIS-RealityTests */,
 				3E3F17112EFC20650052D0A4 /* TARDIS-RealityUITests */,
 				3E3F16F82EFC20630052D0A4 /* Products */,
-				3EEB75802EFC2A3C008274B3 /* Simple TARDIS.usdc */,
 				3EBE76432F04315500EB0B04 /* openapi.json */,
 				3E6C519E2F04873A00F7F441 /* Frameworks */,
 			);
@@ -235,7 +232,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3EEB75812EFC2A3C008274B3 /* Simple TARDIS.usdc in Resources */,
 				3EBE76442F04315500EB0B04 /* openapi.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

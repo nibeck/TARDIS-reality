@@ -9,8 +9,8 @@ struct Tardis3DView: View {
     var viewModel: TardisViewModel
     
     // Initial Rotation state variables (Degrees) - View-specific state
-    @State private var rotationX: Double = 103
-    @State private var rotationY: Double = 32
+    @State private var rotationX: Double = 8 //103
+    @State private var rotationY: Double = 32 //32
     @State private var rotationZ: Double = 0
     
     @State private var modelParts: [String: Entity] = [:]
@@ -31,7 +31,10 @@ struct Tardis3DView: View {
     
     private var tardis3DView: some View {
         RealityView { content in
-            if let loadedModel = try? await Entity(named: "Simple TARDIS") {
+            do {
+                // Attempt to load the model and catch errors if it fails
+                let loadedModel = try await Entity(named: "TARDIS")
+                
                 var parts: [String: Entity] = [:]
                 func collectParts(from entity: Entity) {
                     if entity.components.has(ModelComponent.self) {
@@ -50,15 +53,35 @@ struct Tardis3DView: View {
                 loadedModel.generateCollisionShapes(recursive: true)
                 let rootEntity = Entity()
                 rootEntity.name = "TARDIS"
-                rootEntity.position = [0, -0.3, 0]
+                
+                // ADJUSTMENT: Changed Y from -0.3 to -1.0 to move the model down.
+                // Decrease this value (e.g. -1.5) to move it further down.
+                // Increase this value (e.g. -0.5) to move it up.
+                rootEntity.position = [0, -0.9, 0]
+                
                 loadedModel.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
                 rootEntity.addChild(loadedModel)
                 
                 let anchor = AnchorEntity(world: .zero)
                 anchor.addChild(rootEntity)
                 content.add(anchor)
+                
+                let lightEntity = Entity()
+                
+                let redLightComponent = DirectionalLightComponent(
+                    color: .white, intensity: 10_000
+                )
+                let lightShadowComponent = DirectionalLightComponent.Shadow()
+                lightEntity.components.set([redLightComponent, lightShadowComponent])
+                
+                content.add(lightEntity)
+                
+            } catch {
+                print("Error loading 'TARDIS': \(error)")
+                print("Make sure 'TARDIS.usdz' is in the Project Navigator and 'Target Membership' is checked.")
             }
         }
+        
         update: { content in
             if let anchor = content.entities.first,
                let rootEntity = anchor.children.first(where: { $0.name == "TARDIS" }) {
@@ -79,7 +102,14 @@ struct Tardis3DView: View {
             }
         }
         .frame(maxHeight: .infinity)
-        .background(Color.black)
+        // MARK: - Background Image
+        .background {
+            // Ensure you have an image set named "SpaceBackground" in your Asset Catalog
+            Image("Space-Background")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+        }
         .gesture(combinedGesture)
         .onReceive(timer) { _ in
             rotationY += 0.5

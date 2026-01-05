@@ -41,6 +41,10 @@ class TARDISManager {
         case leftWindow = "Left Windows"
         case rightWindow = "Right Windows"
         case rearWindow = "Rear Windows"
+        case frontPoliceSign = "Front Police Sign"
+        case leftPoliceSign = "Left Police Sign"
+        case rearPoliceSign = "Rear Police Sign"
+        case rightPoliceSign = "Right Police Sign"
         case all = "All"
     }
     
