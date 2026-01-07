@@ -37,7 +37,9 @@ struct ControlPanelView: View {
                 
                 HStack {
                     Button("Test") {
-                        viewModel.runTest()
+                        Task {
+                            await viewModel.runTest()
+                        }
                     }
                     .buttonStyle(.bordered)
                     .background(Color.blue)

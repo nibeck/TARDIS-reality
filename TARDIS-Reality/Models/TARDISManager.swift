@@ -52,6 +52,7 @@ class TARDISManager {
     var availableSounds: [AudioFile] = []
     var availableScenes: [AnimatedScene] = []
     var currentlyPlayingSound: AudioFile?
+    var sectionColors: [LEDSection: Color] = [:]
     
     private let client: Client
     
@@ -60,6 +61,12 @@ class TARDISManager {
             serverURL: URL(string: serverURL)!,
             transport: URLSessionTransport()
         )
+        
+        // Initialize section colors with defaults
+        for section in LEDSection.allCases where section != .all {
+            sectionColors[section] = (section == .frontWindow) ? .yellow : .white
+        }
+        
         // Initial fetch
         fetchSections()
         fetchSounds()
@@ -165,6 +172,17 @@ class TARDISManager {
 
     /// Generic function to set the color of a specific LED section
     func setLightColor(for section: LEDSection, color: Color) {
+        // Optimistically update the state for UI here.
+        // Doing this inside the function ensures the UI updates instantly
+        // regardless of whether this is called from a Test, a Button, or elsewhere.
+        if section == .all {
+            for s in LEDSection.allCases where s != .all {
+                sectionColors[s] = color
+            }
+        } else {
+            sectionColors[section] = color
+        }
+        
         Task {
             let components = color.rgbComponents
             
@@ -283,7 +301,45 @@ class TARDISManager {
         }
     }
     
-    func runTest() {
+    func runTest() async {
         print("Running test")
+        do {
+           
+            print("Test 1 - Multi color")
+//            setLightColor(for: LEDSection.frontWindow, color: Color.red)
+//            setLightColor(for: LEDSection.leftWindow, color: Color.blue)
+//            setLightColor(for: LEDSection.rearWindow, color: Color.green)
+//            setLightColor(for: LEDSection.rightWindow, color: Color.yellow)
+//
+            setLightColor(for: LEDSection.frontPoliceSign, color: Color.red)
+            
+//            setLightColor(for: LEDSection.leftPoliceSign, color: Color.blue)
+//            setLightColor(for: LEDSection.rearPoliceSign, color: Color.green)
+//            setLightColor(for: LEDSection.rightPoliceSign, color: Color.yellow)
+            
+//            setLightColor(for: LEDSection.topLight, color: Color.yellow)
+//
+//            try await Task.sleep(for: .seconds(3)) // Wait between Red and Blue
+//            
+//            print("Test 2 - All white")
+//            setLightColor(for: LEDSection.frontWindow, color: Color.white)
+//            setLightColor(for: LEDSection.leftWindow, color: Color.white)
+//            setLightColor(for: LEDSection.rearWindow, color: Color.white)
+//            setLightColor(for: LEDSection.rightWindow, color: Color.white)
+//
+//            setLightColor(for: LEDSection.frontPoliceSign, color: Color.white)
+//            setLightColor(for: LEDSection.leftPoliceSign, color: Color.white)
+//            setLightColor(for: LEDSection.rearPoliceSign, color: Color.white)
+//            setLightColor(for: LEDSection.rightPoliceSign, color: Color.white)
+//            
+//            setLightColor(for: LEDSection.topLight, color: Color.white)
+//
+//            try await Task.sleep(for: .seconds(2)) // Wait between Blue and Green
+//            
+//            turnOff()
+            
+        } catch {
+            print("Test wait failed: \(error)")
+        }
     }
 }

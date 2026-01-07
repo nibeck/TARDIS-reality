@@ -177,58 +177,52 @@ class TardisViewModel {
         }
     }
     
-    var frontWindowColor: Color = .yellow {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .frontWindow, color: frontWindowColor)
-        }
+    var frontWindowColor: Color {
+        get { TARDISManager.shared.sectionColors[.frontWindow] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .frontWindow, color: newValue) }
     }
     
-    var topLightColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .topLight, color: topLightColor)
-        }
+    var topLightColor: Color {
+        get { TARDISManager.shared.sectionColors[.topLight] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .topLight, color: newValue) }
     }
     
-    var leftWindowColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .leftWindow, color: leftWindowColor)
-        }
+    var leftWindowColor: Color {
+        get { TARDISManager.shared.sectionColors[.leftWindow] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .leftWindow, color: newValue) }
     }
     
-    var rightWindowColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .rightWindow, color: rightWindowColor)
-        }
+    var rightWindowColor: Color {
+        get { TARDISManager.shared.sectionColors[.rightWindow] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .rightWindow, color: newValue) }
     }
     
-    var rearWindowColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .rearWindow, color: rearWindowColor)
-        }
+    var rearWindowColor: Color {
+        get { TARDISManager.shared.sectionColors[.rearWindow] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .rearWindow, color: newValue) }
     }
     
-    var frontPoliceSignColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .frontPoliceSign, color: frontPoliceSignColor)
-        }
-    }
-    var leftPoliceSignColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .leftPoliceSign, color: leftPoliceSignColor)
-        }
-    }
-    var rearPoliceSignColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .rearPoliceSign, color: rearPoliceSignColor)
-        }
-    }
-    var rightPoliceSignColor: Color = .white {
-        didSet {
-            TARDISManager.shared.setLightColor(for: .rightPoliceSign, color: rightPoliceSignColor)
-        }
+    var frontPoliceSignColor: Color {
+        get { TARDISManager.shared.sectionColors[.frontPoliceSign] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .frontPoliceSign, color: newValue) }
     }
     
-    func runTest() {
-        TARDISManager.shared.runTest()
+    var leftPoliceSignColor: Color {
+        get { TARDISManager.shared.sectionColors[.leftPoliceSign] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .leftPoliceSign, color: newValue) }
+    }
+    
+    var rearPoliceSignColor: Color {
+        get { TARDISManager.shared.sectionColors[.rearPoliceSign] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .rearPoliceSign, color: newValue) }
+    }
+    
+    var rightPoliceSignColor: Color {
+        get { TARDISManager.shared.sectionColors[.rightPoliceSign] ?? .white }
+        set { TARDISManager.shared.setLightColor(for: .rightPoliceSign, color: newValue) }
+    }
+    
+    func runTest() async {
+        await TARDISManager.shared.runTest()
     }
 }
