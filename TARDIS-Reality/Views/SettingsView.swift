@@ -1,7 +1,9 @@
 import SwiftUI
 
+
 struct SettingsView: View {
     var body: some View {
+        
         NavigationStack {
             List {
                 Section("Preferences") {
@@ -16,10 +18,24 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                Section("Tests") {
+                        HStack {
+                            Button("Test LEDs") {
+                                Task {
+                                   //await viewModel.runTest()
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                    }
+                }
             }
         }
     }
-}
+
 
 #Preview {
     SettingsView()

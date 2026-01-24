@@ -1,0 +1,6 @@
+- Reduce per-frame material work: cache last applied colors in Tardis3DView and only update materials when a color changes.
+- Avoid per-section API chatter for “All”: add a batch/all-section endpoint or debounce rapid color changes.
+- Make network calls cancelable/throttled: debounce ColorPicker updates or add an explicit Apply action.
+- Persist initial UI state from device: hydrate section colors/toggles from hardware state on launch.
+- Move view model out of HomeView.swift: place TardisViewModel in Models and inject it for clarity/testability.
+- Avoid heavy logging in production: gate debug logs behind a build flag.

@@ -32,6 +32,7 @@ struct AnimatedScene: Identifiable, Hashable, Sendable {
 @Observable
 class TARDISManager {
 
+    // Create a SINGLETON instance of the TARDIS Manager. Everyone will use this single instace to effect change
     static let shared = TARDISManager()
     
     // Enum representing the physical sections of LEDs on the TARDIS
@@ -41,10 +42,10 @@ class TARDISManager {
         case leftWindow = "Left Windows"
         case rightWindow = "Right Windows"
         case rearWindow = "Rear Windows"
-        case frontPoliceSign = "Front Police Sign"
-        case leftPoliceSign = "Left Police Sign"
-        case rearPoliceSign = "Rear Police Sign"
-        case rightPoliceSign = "Right Police Sign"
+        case frontPoliceSign = "Front Police"
+        case leftPoliceSign = "Left Police"
+        case rearPoliceSign = "Rear Police"
+        case rightPoliceSign = "Right Police"
         case all = "All"
     }
     
@@ -53,10 +54,14 @@ class TARDISManager {
     var availableScenes: [AnimatedScene] = []
     var currentlyPlayingSound: AudioFile?
     var sectionColors: [LEDSection: Color] = [:]
+    var modelOpacity: Float = 0.0
+    
+    // Store the current animation task to allow cancellation
+    private var fadeTask: Task<Void, Never>?
     
     private let client: Client
     
-    private init(serverURL: String = "http://192.168.1.161") {
+    private init(serverURL: String = "http://tardis.local") {
         self.client = Client(
             serverURL: URL(string: serverURL)!,
             transport: URLSessionTransport()
@@ -64,7 +69,7 @@ class TARDISManager {
         
         // Initialize section colors with defaults
         for section in LEDSection.allCases where section != .all {
-            sectionColors[section] = (section == .frontWindow) ? .yellow : .white
+            sectionColors[section] = .black
         }
         
         // Initial fetch
@@ -218,6 +223,7 @@ class TARDISManager {
                         section: section.rawValue
                     )
                     
+                    //Call API to set actual LED lights
                     _ = try await client.set_color_api_led_color_post(
                         body: .json(body)
                     )
@@ -258,6 +264,19 @@ class TARDISManager {
                 )
                 
                 _ = try await client.turn_off_api_led_off_post(body: .json(body))
+                
+                // Set the specific section(s) to black in our internal state
+                if let section = section {
+                    if section == .all {
+                        self.setLightColor(for: .all, color: .black)
+                    } else {
+                        self.setLightColor(for: section, color: .black)
+                    }
+                } else {
+                    // Default to all if nil
+                    self.setLightColor(for: .all, color: .black)
+                }
+                
                 print("Turned off LEDs for \(sectionValue ?? "all sections")")
             } catch {
                 print("Failed to turn off LEDs: \(error)")
@@ -301,45 +320,68 @@ class TARDISManager {
         }
     }
     
+    func fadeIn(duration: Double = 4.0) {
+        print("Starting Manual Fade In over \(duration) seconds...")
+        fadeTask?.cancel()
+        
+        fadeTask = Task {
+            let fps: Double = 60
+            let totalSteps = Int(duration * fps)
+            let interval = 1.0 / fps
+            
+            for step in 0...totalSteps {
+                if Task.isCancelled { return }
+                
+                let progress = Float(step) / Float(totalSteps)
+                self.modelOpacity = progress
+                
+                // 1 billion nanoseconds = 1 second
+                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+            }
+            self.modelOpacity = 1.0
+        }
+    }
+    
+    func fadeOut(duration: Double = 4.0) {
+        print("Starting Manual Fade Out over \(duration) seconds...")
+        fadeTask?.cancel()
+        
+        fadeTask = Task {
+            let fps: Double = 60
+            let totalSteps = Int(duration * fps)
+            let interval = 1.0 / fps
+            
+            for step in 0...totalSteps {
+                if Task.isCancelled { return }
+                
+                // Fade from current opacity to 0
+                let startOpacity = self.modelOpacity
+                let progress = Float(step) / Float(totalSteps)
+                self.modelOpacity = startOpacity * (1.0 - progress)
+                
+                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+            }
+            self.modelOpacity = 0.0
+        }
+    }
+    
     func runTest() async {
         print("Running test")
         do {
            
             print("Test 1 - Multi color")
-//            setLightColor(for: LEDSection.frontWindow, color: Color.red)
-//            setLightColor(for: LEDSection.leftWindow, color: Color.blue)
-//            setLightColor(for: LEDSection.rearWindow, color: Color.green)
-//            setLightColor(for: LEDSection.rightWindow, color: Color.yellow)
-//
+            setLightColor(for: LEDSection.frontWindow, color: Color.red)
+            setLightColor(for: LEDSection.leftWindow, color: Color.blue)
+            setLightColor(for: LEDSection.rearWindow, color: Color.green)
+            setLightColor(for: LEDSection.rightWindow, color: Color.yellow)
+
             setLightColor(for: LEDSection.frontPoliceSign, color: Color.red)
+            setLightColor(for: LEDSection.leftPoliceSign, color: Color.blue)
+            setLightColor(for: LEDSection.rearPoliceSign, color: Color.green)
+            setLightColor(for: LEDSection.rightPoliceSign, color: Color.yellow)
             
-//            setLightColor(for: LEDSection.leftPoliceSign, color: Color.blue)
-//            setLightColor(for: LEDSection.rearPoliceSign, color: Color.green)
-//            setLightColor(for: LEDSection.rightPoliceSign, color: Color.yellow)
+            setLightColor(for: LEDSection.topLight, color: Color.white)
             
-//            setLightColor(for: LEDSection.topLight, color: Color.yellow)
-//
-//            try await Task.sleep(for: .seconds(3)) // Wait between Red and Blue
-//            
-//            print("Test 2 - All white")
-//            setLightColor(for: LEDSection.frontWindow, color: Color.white)
-//            setLightColor(for: LEDSection.leftWindow, color: Color.white)
-//            setLightColor(for: LEDSection.rearWindow, color: Color.white)
-//            setLightColor(for: LEDSection.rightWindow, color: Color.white)
-//
-//            setLightColor(for: LEDSection.frontPoliceSign, color: Color.white)
-//            setLightColor(for: LEDSection.leftPoliceSign, color: Color.white)
-//            setLightColor(for: LEDSection.rearPoliceSign, color: Color.white)
-//            setLightColor(for: LEDSection.rightPoliceSign, color: Color.white)
-//            
-//            setLightColor(for: LEDSection.topLight, color: Color.white)
-//
-//            try await Task.sleep(for: .seconds(2)) // Wait between Blue and Green
-//            
-//            turnOff()
-            
-        } catch {
-            print("Test wait failed: \(error)")
-        }
+        } 
     }
 }

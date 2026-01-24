@@ -68,6 +68,12 @@ struct Tardis3DView: View {
                 anchor.addChild(rootEntity)
                 content.add(anchor)
                 
+                // The OpacityComponent is now managed in the 'update' block below,
+                // which uses viewModel.modelOpacity to drive the animation.
+                // We don't want to set a static 0.0 here on the child, as it would
+                // override the parent's opacity.
+
+                
                 let lightEntity = Entity()
                 
                 let redLightComponent = DirectionalLightComponent(
@@ -98,7 +104,7 @@ struct Tardis3DView: View {
                 // Maps from mesh names in USDZ fiel to the appropriate color update function
                 updateMaterial(for: "TARDIS_Mesh", color: viewModel.modelColor)
                 updateMaterial(for: "Front_Windows_Mesh", color: viewModel.frontWindowColor)
-                updateMaterial(for: "Top_Light_Glass_Mesh", color: viewModel.topLightColor)
+                updateMaterial(for: "Top_Light_Light", color: viewModel.topLightColor)
                 updateMaterial(for: "Left_Windows_Mesh", color: viewModel.leftWindowColor)
                 updateMaterial(for: "Right_Windows_Mesh", color: viewModel.rightWindowColor)
                 updateMaterial(for: "Rear_Windows_Mesh", color: viewModel.rearWindowColor)
@@ -106,6 +112,12 @@ struct Tardis3DView: View {
                 updateMaterial(for: "PoliceSignLight_Left", color: viewModel.leftPoliceSignColor)
                 updateMaterial(for: "PoliceSignLight_Rear", color: viewModel.rearPoliceSignColor)
                 updateMaterial(for: "PoliceSignLight_Right", color: viewModel.rightPoliceSignColor)
+                
+                // Update Model Opacity
+                // print("Applying opacity: \(viewModel.modelOpacity)")
+                let opacityComp = OpacityComponent(opacity: viewModel.modelOpacity)
+                rootEntity.components.set(opacityComp)
+
             }
         }
         .frame(maxHeight: .infinity)
@@ -154,7 +166,7 @@ struct Tardis3DView: View {
             material.color = .init(tint: UIColor(color))
             material.roughness = 0.2
             material.metallic = 0.8
-          //  material.__emissive = .color(color)
+            
             modelComp.materials = [material]
             part.components.set(modelComp)
         }
@@ -167,58 +179,176 @@ class TardisViewModel {
     var modelScale: Double = 0.6
     var modelColor: Color = .blue
     
+    var modelOpacity: Float {
+        TARDISManager.shared.modelOpacity
+    }
+    
     var allOnOff: Bool = false {
         didSet {
+            // Update all individual toggles to match the master switch
+            topLightOnOff = allOnOff
+            frontWindowOnOff = allOnOff
+            leftWindowOnOff = allOnOff
+            rightWindowOnOff = allOnOff
+            rearWindowOnOff = allOnOff
+            frontPoliceSignOnOff = allOnOff
+            leftPoliceSignOnOff = allOnOff
+            rearPoliceSignOnOff = allOnOff
+            rightPoliceSignOnOff = allOnOff
+            
             if allOnOff {
                 TARDISManager.shared.turnOn()
+                // Run the animation to face in.
+                TARDISManager.shared.fadeIn(duration: 2.0)
+                TARDISManager.shared.setLightColor(for: .all, color: .white)
             } else {
                 TARDISManager.shared.turnOff()
+                TARDISManager.shared.fadeOut(duration: 2.0)
             }
         }
     }
-    
+
+    // Top Light
+    var topLightOnOff: Bool = false {
+        didSet {
+            if topLightOnOff {
+                TARDISManager.shared.turnOn(section: .topLight)
+                topLightColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .topLight)
+            }
+        }
+    }
+    var topLightColor: Color {
+        get { TARDISManager.shared.sectionColors[.topLight] ?? .black }
+        set { TARDISManager.shared.setLightColor(for: .topLight, color: newValue) }
+    }
+
+    // Front Window
+    var frontWindowOnOff: Bool = false {
+        didSet {
+            if frontWindowOnOff {
+                TARDISManager.shared.turnOn(section: .frontWindow)
+                frontWindowColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .frontWindow)
+            }
+        }
+    }
     var frontWindowColor: Color {
-        get { TARDISManager.shared.sectionColors[.frontWindow] ?? .white }
+        get { TARDISManager.shared.sectionColors[.frontWindow] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .frontWindow, color: newValue) }
     }
     
-    var topLightColor: Color {
-        get { TARDISManager.shared.sectionColors[.topLight] ?? .white }
-        set { TARDISManager.shared.setLightColor(for: .topLight, color: newValue) }
+    // Left Window
+    var leftWindowOnOff: Bool = false {
+        didSet {
+            if leftWindowOnOff {
+                TARDISManager.shared.turnOn(section: .leftWindow)
+                leftWindowColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .leftWindow)
+            }
+        }
     }
-    
     var leftWindowColor: Color {
-        get { TARDISManager.shared.sectionColors[.leftWindow] ?? .white }
+        get { TARDISManager.shared.sectionColors[.leftWindow] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .leftWindow, color: newValue) }
     }
     
+    // Right Window
+    var rightWindowOnOff: Bool = false {
+        didSet {
+            if rightWindowOnOff {
+                TARDISManager.shared.turnOn(section: .rightWindow)
+                rightWindowColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .rightWindow)
+            }
+        }
+    }
     var rightWindowColor: Color {
-        get { TARDISManager.shared.sectionColors[.rightWindow] ?? .white }
+        get { TARDISManager.shared.sectionColors[.rightWindow] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .rightWindow, color: newValue) }
     }
     
+    // Rear Window
+    var rearWindowOnOff: Bool = false {
+        didSet {
+            if rearWindowOnOff {
+                TARDISManager.shared.turnOn(section: .rearWindow)
+                rearWindowColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .rearWindow)
+            }
+        }
+    }
     var rearWindowColor: Color {
-        get { TARDISManager.shared.sectionColors[.rearWindow] ?? .white }
+        get { TARDISManager.shared.sectionColors[.rearWindow] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .rearWindow, color: newValue) }
     }
-    
+      
+    // Front Police Sign
+    var frontPoliceSignOnOff: Bool = false {
+        didSet {
+            if frontPoliceSignOnOff {
+                TARDISManager.shared.turnOn(section: .frontPoliceSign)
+                frontPoliceSignColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .frontPoliceSign)
+            }
+        }
+    }
     var frontPoliceSignColor: Color {
-        get { TARDISManager.shared.sectionColors[.frontPoliceSign] ?? .white }
+        get { TARDISManager.shared.sectionColors[.frontPoliceSign] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .frontPoliceSign, color: newValue) }
     }
     
+    // Left Police Sign
+    var leftPoliceSignOnOff: Bool = false {
+        didSet {
+            if leftPoliceSignOnOff {
+                TARDISManager.shared.turnOn(section: .leftPoliceSign)
+                leftPoliceSignColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .leftPoliceSign)
+            }
+        }
+    }
     var leftPoliceSignColor: Color {
-        get { TARDISManager.shared.sectionColors[.leftPoliceSign] ?? .white }
+        get { TARDISManager.shared.sectionColors[.leftPoliceSign] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .leftPoliceSign, color: newValue) }
     }
     
+    // Rear Police Sign
+    var rearPoliceSignOnOff: Bool = false {
+        didSet {
+            if rearPoliceSignOnOff {
+                TARDISManager.shared.turnOn(section: .rearPoliceSign)
+                rearPoliceSignColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .rearPoliceSign)
+            }
+        }
+    }
     var rearPoliceSignColor: Color {
-        get { TARDISManager.shared.sectionColors[.rearPoliceSign] ?? .white }
+        get { TARDISManager.shared.sectionColors[.rearPoliceSign] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .rearPoliceSign, color: newValue) }
     }
     
+    // Right Police Sign
+    var rightPoliceSignOnOff: Bool = false {
+        didSet {
+            if rightPoliceSignOnOff {
+                TARDISManager.shared.turnOn(section: .rightPoliceSign)
+                rightPoliceSignColor = .white
+            } else {
+                TARDISManager.shared.turnOff(section: .rightPoliceSign)
+            }
+        }
+    }
     var rightPoliceSignColor: Color {
-        get { TARDISManager.shared.sectionColors[.rightPoliceSign] ?? .white }
+        get { TARDISManager.shared.sectionColors[.rightPoliceSign] ?? .black }
         set { TARDISManager.shared.setLightColor(for: .rightPoliceSign, color: newValue) }
     }
     

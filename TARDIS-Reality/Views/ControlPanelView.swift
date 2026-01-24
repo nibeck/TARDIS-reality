@@ -7,133 +7,109 @@ struct ControlPanelView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                Text("TARDIS Control Panel")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Divider()
-                
-                // Scale Control
-//                VStack(alignment: .leading) {
-//                    HStack {
-//                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-//                        Text("Size")
-//                        Spacer()
-//                        Slider(value: $viewModel.modelScale, in: 0.5...3.0)
-//                        Text("\(String(format: "%.1f", viewModel.modelScale))x")
-//                            .monospacedDigit()
-//                            .foregroundStyle(.secondary)
-//                    }
-//                }
-                
                 HStack {
                     Image(systemName: "power")
-                    Text("All Lights")
+                    Text("Power")
                     Spacer()
-                    Toggle("All On/Off", isOn: $viewModel.allOnOff)
+                    Toggle("On/Off", isOn: $viewModel.allOnOff)
                         .labelsHidden()
                 }
                 Divider()
                 
-                HStack {
-                    Button("Test") {
-                        Task {
-                            await viewModel.runTest()
-                        }
+                Group {
+                    // Top Light Control
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.topLightOnOff)
+                            .labelsHidden()
+                        Text("Top Light")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.topLightColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.topLightOnOff)
                     }
-                    .buttonStyle(.bordered)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                    // Front Window Control
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.frontWindowOnOff)
+                            .labelsHidden()
+                        Text("Front Window ")
+                        Spacer()
+
+                        ColorPicker("", selection: $viewModel.frontWindowColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.frontWindowOnOff)
+                    }
+                    // Front Police Sign
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.frontPoliceSignOnOff)
+                            .labelsHidden()
+                        Text("Front Police Sign")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.frontPoliceSignColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.frontPoliceSignOnOff)
+                    }
+                    // Left Police Sign
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.leftPoliceSignOnOff)
+                            .labelsHidden()
+                        Text("Left Police Sign")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.leftPoliceSignColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.leftPoliceSignOnOff)
+                    }
+                    // Rear Police Sign
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.rearPoliceSignOnOff)
+                            .labelsHidden()
+                        Text("Rear Police Sign")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.rearPoliceSignColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.rearPoliceSignOnOff)
+                    }
+                    // Right Police Sign
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.rightPoliceSignOnOff)
+                            .labelsHidden()
+                        Text("Right Police Sign")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.rightPoliceSignColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.rightPoliceSignOnOff)
+                    }
+                    // Left Window
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.leftWindowOnOff)
+                            .labelsHidden()
+                        Text("Left Window")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.leftWindowColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.leftWindowOnOff)
+                    }
+                    // Right Window
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.rightWindowOnOff)
+                            .labelsHidden()
+                        Text("Right Window")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.rightWindowColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.rightWindowOnOff)
+                    }
+                    // Rear Window
+                    HStack {
+                        Toggle("On/Off", isOn: $viewModel.rearWindowOnOff)
+                            .labelsHidden()
+                        Text("Rear Window")
+                        Spacer()
+                        ColorPicker("", selection: $viewModel.rearWindowColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .disabled(!viewModel.rearWindowOnOff)
+                    }
                 }
-                Divider()
-                
-                // Color Control
-//                HStack {
-//                    Image(systemName: "paintpalette.fill")
-//                    Text("TARDIS Color")
-//                    Spacer()
-//                    ColorPicker("", selection: $viewModel.modelColor)
-//                        .labelsHidden()
-//                }
-                
-                // Window Color Control
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Front Window Color")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.frontWindowColor)
-                        .labelsHidden()
-                }
-                
-                // Top Light Control
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Top Light Color")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.topLightColor)
-                        .labelsHidden()
-                }
-                
-                // Front Police Sign
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Front Police Sign")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.frontPoliceSignColor)
-                        .labelsHidden()
-                }
-                // Left Police Sign
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Left Police Sign")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.leftPoliceSignColor)
-                        .labelsHidden()
-                }
-                // Rear Police Sign
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Rear Police Sign")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.rearPoliceSignColor)
-                        .labelsHidden()
-                }
-                // Right Police Sign
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Right Police Sign")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.rightPoliceSignColor)
-                        .labelsHidden()
-                }
-                
-                // Left Window
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Left Window Color")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.leftWindowColor)
-                        .labelsHidden()
-                }
-                
-                // Right Window
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Right Window Color")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.rightWindowColor)
-                        .labelsHidden()
-                }
-                
-                // Back Window
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                    Text("Rear Window Color")
-                    Spacer()
-                    ColorPicker("", selection: $viewModel.rearWindowColor)
-                        .labelsHidden()
-                }
+                .disabled(!viewModel.allOnOff)
             }
             .padding()
         }

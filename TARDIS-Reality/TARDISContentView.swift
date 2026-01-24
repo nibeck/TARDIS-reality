@@ -15,7 +15,11 @@ struct TardisContentView: View {
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
                     }
-
+                AnimationView()
+                    .tabItem {
+                        Label("Animations", systemImage: "play.fill")
+                    }
+                
                 ScenesView()
                     .tabItem {
                         Label("Scenes", systemImage: "lightbulb.fill")
