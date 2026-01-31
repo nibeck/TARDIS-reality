@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3E952B612F2D0105007DA274 /* TARDIS-new.usdc in Resources */ = {isa = PBXBuildFile; fileRef = 3E952B602F2D0105007DA274 /* TARDIS-new.usdc */; };
 		3EB74C762F072BBA0075A8DC /* TARDISAPI-Client in Frameworks */ = {isa = PBXBuildFile; productRef = 3EB74C752F072BBA0075A8DC /* TARDISAPI-Client */; };
 		3EBE76442F04315500EB0B04 /* openapi.json in Resources */ = {isa = PBXBuildFile; fileRef = 3EBE76432F04315500EB0B04 /* openapi.json */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 		3E3F16F72EFC20630052D0A4 /* TARDIS-Reality.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TARDIS-Reality.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E3F17042EFC20650052D0A4 /* TARDIS-RealityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TARDIS-RealityTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E3F170E2EFC20650052D0A4 /* TARDIS-RealityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TARDIS-RealityUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E952B602F2D0105007DA274 /* TARDIS-new.usdc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TARDIS-new.usdc"; sourceTree = "<group>"; };
 		3EBE76432F04315500EB0B04 /* openapi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapi.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -88,6 +90,7 @@
 				3E3F16F82EFC20630052D0A4 /* Products */,
 				3EBE76432F04315500EB0B04 /* openapi.json */,
 				3E6C519E2F04873A00F7F441 /* Frameworks */,
+				3E952B602F2D0105007DA274 /* TARDIS-new.usdc */,
 			);
 			sourceTree = "<group>";
 		};
@@ -232,6 +235,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E952B612F2D0105007DA274 /* TARDIS-new.usdc in Resources */,
 				3EBE76442F04315500EB0B04 /* openapi.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,11 +11,10 @@ struct ControlPanelView: View {
                     Image(systemName: "power")
                     Text("Power")
                     Spacer()
-                    Toggle("On/Off", isOn: $viewModel.allOnOff)
+                    Toggle("On/Off", isOn: $viewModel.powerOnOff)
                         .labelsHidden()
                 }
                 Divider()
-                
                 Group {
                     // Top Light Control
                     HStack {
@@ -109,9 +108,9 @@ struct ControlPanelView: View {
                             .disabled(!viewModel.rearWindowOnOff)
                     }
                 }
-                .disabled(!viewModel.allOnOff)
+                .disabled(!viewModel.powerOnOff)
             }
-            .padding()
+        //    .padding()allOnOff
         }
     }
 }

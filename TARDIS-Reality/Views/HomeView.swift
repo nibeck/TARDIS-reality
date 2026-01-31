@@ -2,6 +2,7 @@ import SwiftUI
 import RealityKit
 import Combine
 import Observation
+import UIKit
 
 // Renamed from HomeView to reflect that it is now just the 3D container
 struct Tardis3DView: View {
@@ -12,6 +13,9 @@ struct Tardis3DView: View {
     @State private var rotationX: Double = 8 //103
     @State private var rotationY: Double = 32 //32
     @State private var rotationZ: Double = 0
+    
+    // Local scale state to isolate zoom gesture from affecting the shared ViewModel (and thus ControlsView)
+    @State private var currentScale: Double = 0.6
     
     @State private var modelParts: [String: Entity] = [:]
     
@@ -25,6 +29,10 @@ struct Tardis3DView: View {
     var body: some View {
         // MARK: - Top: 3D RealityKit View
         tardis3DView
+            .onAppear {
+                // Initialize local scale from ViewModel if needed, or keep default
+                currentScale = viewModel.modelScale
+            }
     }
     
     // MARK: - Subviews
@@ -33,20 +41,87 @@ struct Tardis3DView: View {
         RealityView { content in
             do {
                 // Attempt to load the model and catch errors if it fails
-                let loadedModel = try await Entity(named: "TARDIS")
+                let loadedModel = try await Entity(named: "TARDIS-new")
                 
                 var parts: [String: Entity] = [:]
                 
                 func collectParts(from entity: Entity) {
                     if entity.components.has(ModelComponent.self) {
                         parts[entity.name] = entity
-                        print("Found model part: \(entity.name)")
                     }
                     for child in entity.children {
                         collectParts(from: child)
                     }
                 }
                 collectParts(from: loadedModel)
+                
+                // Manually apply textures to specific meshes that are missing them in the USDZ
+                if let sign = parts["Sign_Mesh"] {
+                    if var modelComp = sign.components[ModelComponent.self] {
+                        do {
+                            // Try to load and scale the texture using UIImage/CoreGraphics
+                            var finalTexture: TextureResource?
+                            
+                            // Scale down by 15% (0.85) to fix "larger than mesh" issue
+                            if let uiImage = UIImage(named: "Sign_Texture"),
+                               let cgImage = uiImage.cgImage {
+                                
+                                let width = CGFloat(cgImage.width)
+                                let height = CGFloat(cgImage.height)
+                                let scale: CGFloat = 0.85
+                                let newWidth = width * scale
+                                let newHeight = height * scale
+                                let xOffset = (width - newWidth) / 2
+                                let yOffset = (height - newHeight) / 2
+                                
+                                let renderer = UIGraphicsImageRenderer(size: CGSize(width: width, height: height))
+                                let scaledImage = renderer.image { _ in
+                                    // Draw the image centered and scaled down
+                                    uiImage.draw(in: CGRect(x: xOffset, y: yOffset, width: newWidth, height: newHeight))
+                                }
+                                
+                                if let scaledCG = scaledImage.cgImage {
+                                    finalTexture = try? TextureResource.generate(from: scaledCG, options: .init(semantic: .color))
+                                }
+                            }
+                            
+                            // Fallback to standard loading if image manipulation fails
+                            if finalTexture == nil {
+                                finalTexture = try TextureResource.load(named: "Sign_Texture")
+                            }
+                            
+                            if let texture = finalTexture {
+                                var material = PhysicallyBasedMaterial()
+                                material.baseColor = .init(texture: .init(texture))
+                                modelComp.materials = [material]
+                                sign.components.set(modelComp)
+                                print("Successfully applied Sign_Texture to Sign_Mesh")
+                            }
+                        } catch {
+                            print("Error loading Sign_Texture: \(error)")
+                        }
+                    }
+                }
+
+                if let decal = parts["Circle_Decal"] {
+                    if var modelComp = decal.components[ModelComponent.self] {
+                        do {
+                            let texture = try TextureResource.load(named: "Decal_Texture")
+                            var material = PhysicallyBasedMaterial()
+                            material.baseColor = .init(texture: .init(texture))
+                            
+                            // Decals usually need transparency.
+                            // If the PNG has alpha, we need to enable blending.
+                            material.blending = .transparent(opacity: .init(scale: 1.0))
+                            
+                            modelComp.materials = [material]
+                            decal.components.set(modelComp)
+                            print("Successfully applied Decal_Texture to Circle_Decal")
+                        } catch {
+                             print("Error loading Decal_Texture: \(error)")
+                        }
+                    }
+                }
                 
                 Task { @MainActor in
                     self.modelParts = parts
@@ -56,10 +131,8 @@ struct Tardis3DView: View {
                 let rootEntity = Entity()
                 rootEntity.name = "TARDIS"
                 
-                // ADJUSTMENT: Changed Y from -0.3 to -1.0 to move the model down.
-                // Decrease this value (e.g. -1.5) to move it further down.
-                // Increase this value (e.g. -0.5) to move it up.
-                rootEntity.position = [0, -0.9, 0]
+                // ADJUSTMENT: Changed Z to -1.5 to move the model further away from the camera.
+                rootEntity.position = [0, -0.9, -1.5]
                 
                 loadedModel.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
                 rootEntity.addChild(loadedModel)
@@ -67,13 +140,7 @@ struct Tardis3DView: View {
                 let anchor = AnchorEntity(world: .zero)
                 anchor.addChild(rootEntity)
                 content.add(anchor)
-                
-                // The OpacityComponent is now managed in the 'update' block below,
-                // which uses viewModel.modelOpacity to drive the animation.
-                // We don't want to set a static 0.0 here on the child, as it would
-                // override the parent's opacity.
 
-                
                 let lightEntity = Entity()
                 
                 let redLightComponent = DirectionalLightComponent(
@@ -94,14 +161,15 @@ struct Tardis3DView: View {
             if let anchor = content.entities.first,
                let rootEntity = anchor.children.first(where: { $0.name == "TARDIS" }) {
                 
-                rootEntity.scale = SIMD3<Float>(repeating: Float(viewModel.modelScale))
+                // Use local currentScale instead of shared viewModel.modelScale
+                rootEntity.scale = SIMD3<Float>(repeating: Float(currentScale))
                 
                 let rotX = simd_quatf(angle: Float(rotationX * .pi / 180), axis: [1, 0, 0])
                 let rotY = simd_quatf(angle: Float(rotationY * .pi / 180), axis: [0, 1, 0])
                 let rotZ = simd_quatf(angle: Float(rotationZ * .pi / 180), axis: [0, 0, 1])
                 rootEntity.orientation = rotZ * rotY * rotX
                 
-                // Maps from mesh names in USDZ fiel to the appropriate color update function
+                // Maps from mesh names in USDZ file to the appropriate color update function
                 updateMaterial(for: "TARDIS_Mesh", color: viewModel.modelColor)
                 updateMaterial(for: "Front_Windows_Mesh", color: viewModel.frontWindowColor)
                 updateMaterial(for: "Top_Light_Light", color: viewModel.topLightColor)
@@ -150,7 +218,10 @@ struct Tardis3DView: View {
             MagnificationGesture()
                 .onChanged { value in
                     let delta = value / lastMagnification
-                    viewModel.modelScale *= Double(delta)
+                    // Update local currentScale instead of shared viewModel
+                    let newScale = currentScale * Double(delta)
+                    // Clamp scale to prevent it from vanishing or becoming too large
+                    currentScale = min(max(newScale, 0.1), 5.0)
                     lastMagnification = value
                 }
                 .onEnded { _ in
@@ -161,14 +232,38 @@ struct Tardis3DView: View {
     
     private func updateMaterial(for partName: String, color: Color) {
         if let part = modelParts[partName],
-           var modelComp = part.components[ModelComponent.self] {
-            var material = SimpleMaterial()
-            material.color = .init(tint: UIColor(color))
-            material.roughness = 0.2
-            material.metallic = 0.8
+           var modelComp = part.components[ModelComponent.self],
+           !modelComp.materials.isEmpty {
             
-            modelComp.materials = [material]
-            part.components.set(modelComp)
+            // Attempt to modify existing PhysicallyBasedMaterial (standard for USDZ)
+            if var pbr = modelComp.materials[0] as? PhysicallyBasedMaterial {
+                // Preserve existing texture if present, apply new color as tint
+                pbr.baseColor = PhysicallyBasedMaterial.BaseColor(tint: UIColor(color), texture: pbr.baseColor.texture)
+                
+                // Write back
+                modelComp.materials[0] = pbr
+                part.components.set(modelComp)
+            }
+            // Attempt to modify existing SimpleMaterial
+            else if var simple = modelComp.materials[0] as? SimpleMaterial {
+                 // Preserve existing texture if present, apply new color as tint
+                simple.color = .init(tint: UIColor(color), texture: simple.color.texture)
+                
+                // Write back
+                modelComp.materials[0] = simple
+                part.components.set(modelComp)
+            }
+            else {
+                // Fallback for unhandled material types: replace with SimpleMaterial (destructive to textures)
+                print("Warning: Could not preserve material type for \(partName). Replacing with SimpleMaterial.")
+                var material = SimpleMaterial()
+                material.color = .init(tint: UIColor(color))
+                material.roughness = 0.2
+                material.metallic = 0.8
+                
+                modelComp.materials = [material]
+                part.components.set(modelComp)
+            }
         }
     }
 }
@@ -176,6 +271,8 @@ struct Tardis3DView: View {
 // MARK: - View Model
 @Observable
 class TardisViewModel {
+    // Note: modelScale here is effectively the initial scale, or could be used for resets.
+    // The gesture now updates a local state in Tardis3DView to avoid affecting UI controls.
     var modelScale: Double = 0.6
     var modelColor: Color = .blue
     
@@ -183,27 +280,29 @@ class TardisViewModel {
         TARDISManager.shared.modelOpacity
     }
     
-    var allOnOff: Bool = false {
+    var powerOnOff: Bool = false {
         didSet {
             // Update all individual toggles to match the master switch
-            topLightOnOff = allOnOff
-            frontWindowOnOff = allOnOff
-            leftWindowOnOff = allOnOff
-            rightWindowOnOff = allOnOff
-            rearWindowOnOff = allOnOff
-            frontPoliceSignOnOff = allOnOff
-            leftPoliceSignOnOff = allOnOff
-            rearPoliceSignOnOff = allOnOff
-            rightPoliceSignOnOff = allOnOff
+            topLightOnOff = powerOnOff
+            frontWindowOnOff = powerOnOff
+            leftWindowOnOff = powerOnOff
+            rightWindowOnOff = powerOnOff
+            rearWindowOnOff = powerOnOff
+            frontPoliceSignOnOff = powerOnOff
+            leftPoliceSignOnOff = powerOnOff
+            rearPoliceSignOnOff = powerOnOff
+            rightPoliceSignOnOff = powerOnOff
             
-            if allOnOff {
-                TARDISManager.shared.turnOn()
-                // Run the animation to face in.
+            if powerOnOff {
+                // Face 3d Model in
                 TARDISManager.shared.fadeIn(duration: 2.0)
-                TARDISManager.shared.setLightColor(for: .all, color: .white)
+                // Fade LEDs out
+                TARDISManager.shared.fadeLED(color: Color.white, duration: 3.0)
             } else {
-                TARDISManager.shared.turnOff()
+                // Fade 3d model out
                 TARDISManager.shared.fadeOut(duration: 2.0)
+                // Fade LEDs out
+                TARDISManager.shared.fadeLED(color: Color.black, duration: 3.0)
             }
         }
     }

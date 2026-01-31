@@ -253,6 +253,33 @@ class TARDISManager {
             }
         }
     }
+    
+    func fadeLED(section: LEDSection? = nil, color: Color? = nil, duration: Double = 1.0) {
+        Task {
+            do {
+                // Treat .all as nil (all sections) for the fade request
+                let sectionValue = (section == .all) ? nil : section?.rawValue
+                
+                var colorComponents: Components.Schemas.Color? = nil
+                if let color = color {
+                     let components = color.rgbComponents
+                     colorComponents = .init(r: components.r, g: components.g, b: components.b)
+                }
+
+                let body = Components.Schemas.FadeRequest(
+                    color: colorComponents,
+                    duration: duration,
+                    section: sectionValue
+                )
+                
+                _ = try await client.fade_api_led_fade_post(body: .json(body))
+                
+                print("Faded LEDs for \(sectionValue ?? "all sections")")
+            } catch {
+                print("Failed to fade LEDs: \(error)")
+            }
+        }
+    }
 
     func turnOff(section: LEDSection? = nil) {
         Task {
@@ -268,8 +295,10 @@ class TARDISManager {
                 // Set the specific section(s) to black in our internal state
                 if let section = section {
                     if section == .all {
+                   //     self.fadeOut(duration: 3)
                         self.setLightColor(for: .all, color: .black)
                     } else {
+                   //     self.fadeOut(duration: 3)
                         self.setLightColor(for: section, color: .black)
                     }
                 } else {
@@ -364,7 +393,7 @@ class TARDISManager {
             self.modelOpacity = 0.0
         }
     }
-    
+
     func runTest() async {
         print("Running test")
         do {
