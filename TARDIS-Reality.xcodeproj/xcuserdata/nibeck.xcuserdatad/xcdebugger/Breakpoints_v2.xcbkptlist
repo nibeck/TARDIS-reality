@@ -14,9 +14,9 @@
             filePath = "TARDIS-Reality/Models/TARDISManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
-            landmarkName = "stopSound()"
+            startingLineNumber = "324"
+            endingLineNumber = "324"
+            landmarkName = "playSound(sound:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -30,9 +30,9 @@
             filePath = "TARDIS-Reality/Models/TARDISManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "284"
-            endingLineNumber = "284"
-            landmarkName = "turnOff(section:)"
+            startingLineNumber = "272"
+            endingLineNumber = "272"
+            landmarkName = "fadeLED(section:color:duration:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -46,10 +46,26 @@
             filePath = "TARDIS-Reality/Models/TARDISManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "259"
-            endingLineNumber = "259"
-            landmarkName = "fadeLED(section:color:duration:)"
+            startingLineNumber = "247"
+            endingLineNumber = "247"
+            landmarkName = "turnOn(section:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F5898B42-1D57-4E56-A648-ADFD0EC89A61"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TARDIS-Reality/Views/HomeView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "730"
+            endingLineNumber = "730"
+            landmarkName = "powerOnOff"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
