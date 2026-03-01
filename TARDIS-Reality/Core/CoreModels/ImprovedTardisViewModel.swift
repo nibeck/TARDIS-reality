@@ -1,27 +1,6 @@
 import SwiftUI
 import Observation
 
-// MARK: - Light Section Model
-struct LightSection {
-    let id: TARDISManager.LEDSection
-    var isOn: Bool
-    var color: Color
-    var isFading: Bool = false
-    
-    var displayColor: Color {
-        isOn ? color : .black
-    }
-}
-
-// MARK: - Light Control Actions
-enum LightAction {
-    case turnOn(section: TARDISManager.LEDSection, immediate: Bool)
-    case turnOff(section: TARDISManager.LEDSection, immediate: Bool)
-    case setColor(section: TARDISManager.LEDSection, color: Color)
-    case powerOn
-    case powerOff
-}
-
 // MARK: - Improved ViewModel
 @Observable
 class ImprovedTardisViewModel {

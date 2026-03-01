@@ -353,7 +353,7 @@ class TARDISManager {
         }
     }
     
-    func fadeIn(duration: Double = 4.0) {
+    func fadeIn(duration: Double = 1.0) {
         print("Starting Manual Fade In over \(duration) seconds...")
         fadeTask?.cancel()
         
@@ -375,7 +375,7 @@ class TARDISManager {
         }
     }
     
-    func fadeOut(duration: Double = 4.0) {
+    func fadeOut(duration: Double = 1.0) {
         print("Starting Manual Fade Out over \(duration) seconds...")
         fadeTask?.cancel()
         

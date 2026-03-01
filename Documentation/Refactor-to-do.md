@@ -4,7 +4,8 @@ Updating `TardisViewModel` to use `LightAction` enum + single action handler pat
 
 ## Steps
 
-- [ ] Move `LightSection` struct and `LightAction` enum to `Data/Models/` (separate files)
+- [X] Move `LightSection` struct and `LightAction` enum to `Data/Models/` (separate files)
+- [X] Extract `TardisViewModel` out of `Tardis3DView.swift` into `Core/CoreModels/TardisViewModel.swift`
 - [ ] Add private `lightSections` dictionary `[TARDISManager.LEDSection: LightSection]` to `TardisViewModel` to replace individual stored properties
 - [ ] Add `initializeLightSections()` method and call it from `init()` — sets all 9 sections to `isOn: false`, `color: .white`
 - [ ] Remove `isUpdatingFromPowerSwitch` flag — this is replaced by the action handler pattern
